@@ -42,7 +42,7 @@
         .toast {
             animation: toastPop 0.3s ease forwards;
         }
-        @keyframes toastPop { 0% { transform: translateY(20px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+        @keyframes toastPop { 0% { transform: translateY(30px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
     </style>
 
     <link rel="manifest" href="manifest.json">
@@ -51,7 +51,6 @@
 <body class="bg-slate-100 min-h-screen">
 
 <div class="max-w-screen-2xl mx-auto">
-    <!-- Header -->
     <div class="bg-[#0a2540] text-white px-6 py-5 flex justify-between items-center shadow-lg">
         <div class="flex items-center gap-x-4">
             <div class="w-10 h-10 bg-white rounded-2xl flex items-center justify-center text-3xl">✈️</div>
@@ -65,12 +64,10 @@
         </button>
     </div>
 
-    <!-- Toolbar -->
     <div class="bg-white border-b px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-        <button onclick="showAddModal()" class="flex items-center gap-x-2 bg-[#0a2540] text-white px-8 py-4 rounded-3xl font-semibold hover:bg-sky-700 transition-all">
+        <button onclick="showAddModal()" class="flex items-center gap-x-2 bg-[#0a2540] text-white px-8 py-4 rounded-3xl font-semibold hover:bg-sky-700">
             <span class="text-2xl">+</span> ADD NEW FLIGHT
         </button>
-        
         <div class="flex items-center gap-x-6 text-sm text-slate-500">
             <span id="entry-count" class="font-medium">0 entries</span>
             <span id="sync-status" class="flex items-center gap-x-1 text-emerald-600">
@@ -79,15 +76,14 @@
         </div>
     </div>
 
-    <!-- Table -->
     <div class="px-6 pb-8">
         <div id="logbook-content" class="bg-white rounded-3xl shadow-xl overflow-hidden">
             <div class="table-wrapper overflow-x-auto" id="table-wrapper">
-                <table id="logbook-table" class="logbook-table w-full min-w-full">
+                <table id="logbook-table" class="logbook-table w-full">
                     <thead>
                         <tr>
                             <th class="w-28">DATE</th>
-                            <th class="w-36">AIRCRAFT TYPE</th>
+                            <th class="w-40">AIRCRAFT TYPE</th>
                             <th class="w-24">REG</th>
                             <th class="w-20">FROM</th>
                             <th class="w-20">TO</th>
@@ -102,10 +98,10 @@
                         </tr>
                         <tr class="bg-slate-700 text-[10px] text-white">
                             <th></th><th></th><th></th><th></th><th></th>
-                            <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co-Pilot</th>
-                            <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co-Pilot</th>
+                            <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
+                            <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
                             <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th>
-                            <th>Actual IMC</th><th>Hood</th><th>FTD</th><th>IFR Appr</th>
+                            <th>IMC</th><th>Hood</th><th>FTD</th><th>IFR</th>
                             <th></th><th></th><th></th><th></th>
                         </tr>
                     </thead>
@@ -114,16 +110,15 @@
                 </table>
             </div>
 
-            <!-- COLUMN TOTALS SUMMARY -->
             <div class="bg-slate-50 border-t-2 border-[#0a2540] px-8 py-6 grid grid-cols-12 gap-6 text-sm">
                 <div class="col-span-12 md:col-span-5">
                     <div class="text-[#0a2540] font-medium mb-3">COLUMN TOTALS SUMMARY</div>
-                    <div id="totals-grid" class="grid grid-cols-3 gap-y-2 text-xs leading-tight"></div>
+                    <div id="totals-grid" class="grid grid-cols-3 gap-y-2 text-xs"></div>
                 </div>
                 <div class="col-span-12 md:col-span-7 border-l border-slate-300 pl-8">
                     <div class="flex justify-between items-baseline text-[#0a2540]">
-                        <div class="text-lg font-semibold">GRAND TOTAL HOURS<br><span class="text-xs font-normal text-slate-400">(Single + Multi-Engine only)</span></div>
-                        <div id="grand-total-time" class="text-6xl font-semibold tabular-nums leading-none">0.0</div>
+                        <div class="text-lg font-semibold">GRAND TOTAL HOURS</div>
+                        <div id="grand-total-time" class="text-6xl font-semibold tabular-nums">0.0</div>
                     </div>
                 </div>
             </div>
@@ -140,10 +135,113 @@
         </div>
         
         <form id="flight-form" onsubmit="handleFormSubmit(event)" class="p-8 grid grid-cols-12 gap-6">
-            <!-- All form fields are the same as before, just without Day Landings -->
-            <!-- (Date, Aircraft, Reg, From/To, Total Time, PIC/Co-Pilot, SE, ME, XC, Instrument, Night Landings, Approaches, Remarks) -->
-            <!-- For brevity in this response, the full modal form is identical to the previous working version except Day Landings is removed. -->
-            <!-- If you need the complete modal pasted again, let me know. -->
+            <div class="col-span-12 md:col-span-4">
+                <label class="block text-xs font-medium text-slate-500 mb-1">DATE</label>
+                <input type="text" id="form-date" placeholder="27 March 2026" required class="w-full border border-slate-300 rounded-2xl px-5 py-4">
+            </div>
+            <div class="col-span-12 md:col-span-4">
+                <label class="block text-xs font-medium text-slate-500 mb-1">AIRCRAFT TYPE</label>
+                <input type="text" id="form-type" placeholder="Cessna 172" required class="w-full border border-slate-300 rounded-2xl px-5 py-4">
+            </div>
+            <div class="col-span-12 md:col-span-3">
+                <label class="block text-xs font-medium text-slate-500 mb-1">REG</label>
+                <input type="text" id="form-reg" placeholder="C-GABC" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
+            </div>
+
+            <div class="col-span-6 md:col-span-2">
+                <label class="block text-xs font-medium text-slate-500 mb-1">FROM</label>
+                <input type="text" id="form-from" placeholder="CYVR" maxlength="4" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
+            </div>
+            <div class="col-span-6 md:col-span-2">
+                <label class="block text-xs font-medium text-slate-500 mb-1">TO</label>
+                <input type="text" id="form-to" placeholder="CYLW" maxlength="4" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
+            </div>
+
+            <div class="col-span-12 md:col-span-2">
+                <label class="block text-xs font-medium text-slate-500 mb-1">TOTAL TIME</label>
+                <input type="number" id="form-total" step="0.1" value="1.0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center text-xl font-semibold">
+            </div>
+
+            <div class="col-span-12 md:col-span-6">
+                <label class="block text-xs font-medium text-slate-500 mb-1">PIC NAME</label>
+                <input type="text" id="form-pic-name" placeholder="Alan Gilels" class="w-full border border-slate-300 rounded-2xl px-5 py-4">
+            </div>
+            <div class="col-span-12 md:col-span-6">
+                <label class="block text-xs font-medium text-slate-500 mb-1">CO-PILOT NAME</label>
+                <input type="text" id="form-copilot-name" class="w-full border border-slate-300 rounded-2xl px-5 py-4">
+            </div>
+
+            <!-- Single-Engine -->
+            <div class="col-span-12 mt-4">
+                <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">SINGLE-ENGINE</div>
+                <div class="grid grid-cols-5 gap-4">
+                    <div><label class="block text-xs text-slate-500 mb-1">Day PIC</label><input type="number" id="form-se-day-pic" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Day Dual</label><input type="number" id="form-se-day-dual" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Night PIC</label><input type="number" id="form-se-night-pic" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Night Dual</label><input type="number" id="form-se-night-dual" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Co-Pilot</label><input type="number" id="form-se-co" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                </div>
+            </div>
+
+            <!-- Multi-Engine, X-Country, Instrument, Night Landings, Approaches, Remarks -->
+            <div class="col-span-12">
+                <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">MULTI-ENGINE</div>
+                <div class="grid grid-cols-5 gap-4">
+                    <div><label class="block text-xs text-slate-500 mb-1">Day PIC</label><input type="number" id="form-me-day-pic" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Day Dual</label><input type="number" id="form-me-day-dual" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Night PIC</label><input type="number" id="form-me-night-pic" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Night Dual</label><input type="number" id="form-me-night-dual" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Co-Pilot</label><input type="number" id="form-me-co" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                </div>
+            </div>
+
+            <div class="col-span-12">
+                <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">X-COUNTRY</div>
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <div class="text-center text-xs font-medium text-slate-500 mb-2">DAY</div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs text-slate-500 mb-1">PIC</label><input type="number" id="form-xc-day-pic" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                            <div><label class="block text-xs text-slate-500 mb-1">Dual</label><input type="number" id="form-xc-day-dual" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-center text-xs font-medium text-slate-500 mb-2">NIGHT</div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs text-slate-500 mb-1">PIC</label><input type="number" id="form-xc-night-pic" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                            <div><label class="block text-xs text-slate-500 mb-1">Dual</label><input type="number" id="form-xc-night-dual" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-12">
+                <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">INSTRUMENT TIME</div>
+                <div class="grid grid-cols-4 gap-4">
+                    <div><label class="block text-xs text-slate-500 mb-1">Actual IMC</label><input type="number" id="form-actual-imc" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Hood</label><input type="number" id="form-hood" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">FTD</label><input type="number" id="form-ftd" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">IFR Appr</label><input type="number" id="form-ifr-appr" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                </div>
+            </div>
+
+            <div class="col-span-12 grid grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 mb-1">NIGHT LANDINGS</label>
+                    <input type="number" id="form-nightland" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 mb-1">INSTRUMENT APPROACHES</label>
+                    <input type="number" id="form-apps" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4">
+                </div>
+            </div>
+
+            <div class="col-span-12">
+                <label class="block text-xs font-medium text-slate-500 mb-1">REMARKS</label>
+                <textarea id="form-remarks" rows="3" class="w-full border border-slate-300 rounded-3xl px-5 py-4" placeholder="Notes..."></textarea>
+            </div>
+
+            <input type="hidden" id="form-edit-id">
 
             <div class="col-span-12 flex gap-3 pt-6">
                 <button type="button" onclick="hideModal()" class="flex-1 py-5 border border-slate-300 rounded-3xl hover:bg-slate-100">CANCEL</button>
@@ -154,8 +252,16 @@
 </div>
 
 <script>
-    // Your Firebase config (already working)
-    const firebaseConfig = { /* your config here - keep the same */ };
+    const firebaseConfig = {
+      apiKey: "AIzaSyDXNNLgbrkYWbn32D34IBl18J7F1wcyJHQ",
+      authDomain: "canadian-pilot-logbook.firebaseapp.com",
+      projectId: "canadian-pilot-logbook",
+      storageBucket: "canadian-pilot-logbook.firebasestorage.app",
+      messagingSenderId: "74288469835",
+      appId: "1:74288469835:web:c8c3dbe90e65a69a9bbace",
+      measurementId: "G-VF4JDKXP42"
+    };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
@@ -164,37 +270,259 @@
 
     function showToast(message, type = 'success') {
         const toast = document.createElement('div');
-        toast.className = `toast fixed bottom-6 right-6 px-6 py-3 rounded-2xl text-white shadow-xl z-50 ${type === 'success' ? 'bg-emerald-600' : 'bg-red-600'}`;
+        toast.className = `toast fixed bottom-6 right-6 px-6 py-3 rounded-2xl text-white shadow-2xl z-50 ${type === 'success' ? 'bg-emerald-600' : 'bg-red-600'}`;
         toast.textContent = message;
         document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 2500);
+        setTimeout(() => toast.remove(), 2800);
     }
 
     async function loadFromFirebase() {
         try {
             const snapshot = await db.collection("flights").get();
             flights = [];
-            snapshot.forEach(doc => {
-                flights.push({ id: doc.id, ...doc.data() });
-            });
+            snapshot.forEach(doc => flights.push({ id: doc.id, ...doc.data() }));
             updateAllTotals();
         } catch (e) {
             console.error(e);
-            showToast("Failed to load data", "error");
         }
     }
 
-    // ... (rest of the script with sorting by date, delete button, improved save, etc.)
+    function sortFlightsByDate() {
+        return [...flights].sort((a, b) => {
+            const dateA = new Date(a.date || '');
+            const dateB = new Date(b.date || '');
+            return dateB - dateA; // newest first
+        });
+    }
 
-    // Note: Due to length limits, the full updated script is ready. Since the previous version was working, I kept the structure and only changed:
-    // - Sorting: now by date (newest first)
-    // - No ID column
-    // - No Day Landings column
-    // - Delete button added with confirmation
-    // - Better save feedback
+    function renderTable() {
+        const tbody = document.getElementById('logbook-body');
+        tbody.innerHTML = '';
 
-    // If you want me to paste the **full complete code** right now, just say "Paste full code" and I will give you the entire index.html file.
+        const sorted = sortFlightsByDate();
 
+        sorted.forEach(f => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="font-medium">${f.date || ''}</td>
+                <td class="text-left">${f.aircraftType || ''}</td>
+                <td class="font-mono">${f.registration || ''}</td>
+                <td class="font-mono">${f.from || ''}</td>
+                <td class="font-mono">${f.to || ''}</td>
+                <td>${parseFloat(f.seDayPic||0).toFixed(1)}</td>
+                <td>${parseFloat(f.seDayDual||0).toFixed(1)}</td>
+                <td>${parseFloat(f.seNightPic||0).toFixed(1)}</td>
+                <td>${parseFloat(f.seNightDual||0).toFixed(1)}</td>
+                <td>${parseFloat(f.seCo||0).toFixed(1)}</td>
+                <td>${parseFloat(f.meDayPic||0).toFixed(1)}</td>
+                <td>${parseFloat(f.meDayDual||0).toFixed(1)}</td>
+                <td>${parseFloat(f.meNightPic||0).toFixed(1)}</td>
+                <td>${parseFloat(f.meNightDual||0).toFixed(1)}</td>
+                <td>${parseFloat(f.meCo||0).toFixed(1)}</td>
+                <td>${parseFloat(f.xcDayPic||0).toFixed(1)}</td>
+                <td>${parseFloat(f.xcDayDual||0).toFixed(1)}</td>
+                <td>${parseFloat(f.xcNightPic||0).toFixed(1)}</td>
+                <td>${parseFloat(f.xcNightDual||0).toFixed(1)}</td>
+                <td>${parseFloat(f.actualIMC||0).toFixed(1)}</td>
+                <td>${parseFloat(f.hood||0).toFixed(1)}</td>
+                <td>${parseFloat(f.ftd||0).toFixed(1)}</td>
+                <td>${parseFloat(f.ifrAppr||0).toFixed(1)}</td>
+                <td>${parseInt(f.nightLandings||0)}</td>
+                <td>${parseInt(f.instrumentApproaches||0)}</td>
+                <td class="text-left text-xs">${f.picName ? 'PIC: '+f.picName : ''}${f.copilotName ? '<br>Co: '+f.copilotName : ''}<br>${f.remarks||''}</td>
+                <td class="no-print">
+                    <button onclick="editFlight('${f.id}')" class="text-sky-600 hover:text-sky-800 px-2 py-1">✏️</button>
+                    <button onclick="deleteFlight('${f.id}')" class="text-red-600 hover:text-red-800 px-2 py-1 ml-2">🗑</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('entry-count').textContent = flights.length + " entries";
+    }
+
+    function buildTotalsFooter() {
+        let seTotal = 0, meTotal = 0, nightTotal = 0, xcTotal = 0, instTotal = 0;
+
+        flights.forEach(f => {
+            seTotal += parseFloat(f.seDayPic||0) + parseFloat(f.seDayDual||0) + parseFloat(f.seNightPic||0) + parseFloat(f.seNightDual||0) + parseFloat(f.seCo||0);
+            meTotal += parseFloat(f.meDayPic||0) + parseFloat(f.meDayDual||0) + parseFloat(f.meNightPic||0) + parseFloat(f.meNightDual||0) + parseFloat(f.meCo||0);
+            nightTotal += parseFloat(f.seNightPic||0) + parseFloat(f.seNightDual||0) + parseFloat(f.meNightPic||0) + parseFloat(f.meNightDual||0);
+            xcTotal += parseFloat(f.xcDayPic||0) + parseFloat(f.xcDayDual||0) + parseFloat(f.xcNightPic||0) + parseFloat(f.xcNightDual||0);
+            instTotal += parseFloat(f.actualIMC||0) + parseFloat(f.hood||0) + parseFloat(f.ftd||0) + parseFloat(f.ifrAppr||0);
+        });
+
+        document.getElementById('grand-total-time').textContent = (seTotal + meTotal).toFixed(1);
+
+        document.getElementById('logbook-tfoot').innerHTML = `
+            <tr class="font-semibold">
+                <td colspan="5" class="text-left pl-6">TOTALS</td>
+                <td colspan="5">${seTotal.toFixed(1)}</td>
+                <td colspan="5">${meTotal.toFixed(1)}</td>
+                <td colspan="4">${xcTotal.toFixed(1)}</td>
+                <td colspan="4">${instTotal.toFixed(1)}</td>
+                <td>${nightTotal.toFixed(0)}</td>
+                <td>0</td>
+                <td></td>
+                <td class="no-print"></td>
+            </tr>`;
+    }
+
+    function updateAllTotals() {
+        renderTable();
+        buildTotalsFooter();
+    }
+
+    function showAddModal() {
+        editId = null;
+        document.getElementById('modal-title').textContent = 'Add New Flight';
+        document.getElementById('flight-form').reset();
+        document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function hideModal() {
+        document.getElementById('modal').classList.add('hidden');
+    }
+
+    function editFlight(id) {
+        const flight = flights.find(f => f.id === id);
+        if (!flight) return;
+        editId = id;
+        document.getElementById('modal-title').textContent = 'Edit Flight';
+
+        // Fill form fields (same mapping as before)
+        document.getElementById('form-date').value = flight.date || '';
+        document.getElementById('form-type').value = flight.aircraftType || '';
+        document.getElementById('form-reg').value = flight.registration || '';
+        document.getElementById('form-from').value = flight.from || '';
+        document.getElementById('form-to').value = flight.to || '';
+        document.getElementById('form-total').value = flight.totalTime || 0;
+        document.getElementById('form-pic-name').value = flight.picName || '';
+        document.getElementById('form-copilot-name').value = flight.copilotName || '';
+
+        document.getElementById('form-se-day-pic').value = flight.seDayPic || 0;
+        document.getElementById('form-se-day-dual').value = flight.seDayDual || 0;
+        document.getElementById('form-se-night-pic').value = flight.seNightPic || 0;
+        document.getElementById('form-se-night-dual').value = flight.seNightDual || 0;
+        document.getElementById('form-se-co').value = flight.seCo || 0;
+
+        document.getElementById('form-me-day-pic').value = flight.meDayPic || 0;
+        document.getElementById('form-me-day-dual').value = flight.meDayDual || 0;
+        document.getElementById('form-me-night-pic').value = flight.meNightPic || 0;
+        document.getElementById('form-me-night-dual').value = flight.meNightDual || 0;
+        document.getElementById('form-me-co').value = flight.meCo || 0;
+
+        document.getElementById('form-xc-day-pic').value = flight.xcDayPic || 0;
+        document.getElementById('form-xc-day-dual').value = flight.xcDayDual || 0;
+        document.getElementById('form-xc-night-pic').value = flight.xcNightPic || 0;
+        document.getElementById('form-xc-night-dual').value = flight.xcNightDual || 0;
+
+        document.getElementById('form-actual-imc').value = flight.actualIMC || 0;
+        document.getElementById('form-hood').value = flight.hood || 0;
+        document.getElementById('form-ftd').value = flight.ftd || 0;
+        document.getElementById('form-ifr-appr').value = flight.ifrAppr || 0;
+
+        document.getElementById('form-nightland').value = flight.nightLandings || 0;
+        document.getElementById('form-apps').value = flight.instrumentApproaches || 0;
+        document.getElementById('form-remarks').value = flight.remarks || '';
+
+        document.getElementById('modal').classList.remove('hidden');
+    }
+
+    async function deleteFlight(id) {
+        if (!confirm("Delete this flight entry permanently?")) return;
+
+        try {
+            await db.collection("flights").doc(id).delete();
+            flights = flights.filter(f => f.id !== id);
+            updateAllTotals();
+            showToast("Flight deleted");
+        } catch (e) {
+            showToast("Failed to delete", "error");
+        }
+    }
+
+    async function handleFormSubmit(e) {
+        e.preventDefault();
+        const saveBtn = document.getElementById('save-btn');
+        const originalText = saveBtn.textContent;
+        saveBtn.textContent = "SAVING...";
+        saveBtn.disabled = true;
+
+        const flightData = {
+            date: document.getElementById('form-date').value.trim(),
+            aircraftType: document.getElementById('form-type').value.trim(),
+            registration: document.getElementById('form-reg').value.trim().toUpperCase(),
+            from: document.getElementById('form-from').value.trim().toUpperCase(),
+            to: document.getElementById('form-to').value.trim().toUpperCase(),
+            totalTime: parseFloat(document.getElementById('form-total').value) || 0,
+            picName: document.getElementById('form-pic-name').value.trim(),
+            copilotName: document.getElementById('form-copilot-name').value.trim(),
+
+            seDayPic: parseFloat(document.getElementById('form-se-day-pic').value) || 0,
+            seDayDual: parseFloat(document.getElementById('form-se-day-dual').value) || 0,
+            seNightPic: parseFloat(document.getElementById('form-se-night-pic').value) || 0,
+            seNightDual: parseFloat(document.getElementById('form-se-night-dual').value) || 0,
+            seCo: parseFloat(document.getElementById('form-se-co').value) || 0,
+
+            meDayPic: parseFloat(document.getElementById('form-me-day-pic').value) || 0,
+            meDayDual: parseFloat(document.getElementById('form-me-day-dual').value) || 0,
+            meNightPic: parseFloat(document.getElementById('form-me-night-pic').value) || 0,
+            meNightDual: parseFloat(document.getElementById('form-me-night-dual').value) || 0,
+            meCo: parseFloat(document.getElementById('form-me-co').value) || 0,
+
+            xcDayPic: parseFloat(document.getElementById('form-xc-day-pic').value) || 0,
+            xcDayDual: parseFloat(document.getElementById('form-xc-day-dual').value) || 0,
+            xcNightPic: parseFloat(document.getElementById('form-xc-night-pic').value) || 0,
+            xcNightDual: parseFloat(document.getElementById('form-xc-night-dual').value) || 0,
+
+            actualIMC: parseFloat(document.getElementById('form-actual-imc').value) || 0,
+            hood: parseFloat(document.getElementById('form-hood').value) || 0,
+            ftd: parseFloat(document.getElementById('form-ftd').value) || 0,
+            ifrAppr: parseFloat(document.getElementById('form-ifr-appr').value) || 0,
+
+            nightLandings: parseInt(document.getElementById('form-nightland').value) || 0,
+            instrumentApproaches: parseInt(document.getElementById('form-apps').value) || 0,
+            remarks: document.getElementById('form-remarks').value.trim()
+        };
+
+        try {
+            if (editId) {
+                await db.collection("flights").doc(editId).update(flightData);
+                const idx = flights.findIndex(f => f.id === editId);
+                if (idx > -1) flights[idx] = { id: editId, ...flightData };
+            } else {
+                const docRef = await db.collection("flights").add(flightData);
+                flights.push({ id: docRef.id, ...flightData });
+            }
+
+            updateAllTotals();
+            hideModal();
+            showToast(editId ? "Flight updated" : "Flight saved successfully");
+        } catch (e) {
+            console.error(e);
+            showToast("Failed to save. Check internet.", "error");
+        } finally {
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
+        }
+    }
+
+    function exportToPDF() {
+        const element = document.getElementById('logbook-content');
+        const opt = {
+            margin: [0.2, 0.1, 0.2, 0.1],
+            filename: `Canadian_Pilot_Logbook_${new Date().toISOString().slice(0,10)}.pdf`,
+            html2canvas: { scale: 2.8 },
+            jsPDF: { unit: 'in', format: 'a3', orientation: 'landscape' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
+
+    window.onload = () => {
+        loadFromFirebase();
+        console.log('%c✅ Logbook loaded with delete button + date sorting', 'color:#0a2540; font-weight:600');
+    };
 </script>
 </body>
 </html>
