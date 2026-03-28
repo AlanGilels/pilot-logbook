@@ -80,8 +80,8 @@
             </div>
         </div>
 
-        <!-- Compact Totals - placed right here between button and entries -->
-        <div class="bg-slate-50 border border-[#0a2540]/20 rounded-3xl p-4 grid grid-cols-12 gap-5 text-sm scale-[0.82] origin-top">
+        <!-- Compact Totals Section - placed right here -->
+        <div class="bg-slate-50 border border-[#0a2540]/20 rounded-3xl p-4 grid grid-cols-12 gap-6 text-sm scale-[0.82] origin-top">
             <div class="col-span-12 md:col-span-5">
                 <div class="text-[#0a2540] font-medium mb-1 text-sm">COLUMN TOTALS SUMMARY</div>
                 <div id="totals-grid" class="grid grid-cols-3 gap-y-1 text-xs leading-tight"></div>
@@ -133,7 +133,8 @@
                         </tr>
                     </thead>
                     <tbody id="logbook-body"></tbody>
-                    <tfoot id="logbook-tfoot" class="bg-slate-100 border-t-4 border-[#0a2540] font-semibold text-[#0a2540]"></tfoot>
+                    <!-- Bottom footer totals removed -->
+                    <tfoot id="logbook-tfoot"></tfoot>
                 </table>
             </div>
         </div>
@@ -197,7 +198,7 @@
                 </div>
             </div>
 
-            <!-- Multi-Engine, X-Country, Instrument, Night Landings, Approaches, Remarks - same as before -->
+            <!-- Multi-Engine, X-Country, Instrument, Night Landings, Approaches, Remarks remain the same -->
 
             <div class="col-span-12 flex gap-3 pt-8">
                 <button type="button" onclick="hideModal()" class="flex-1 py-5 border border-slate-300 rounded-3xl hover:bg-slate-100">CANCEL</button>
@@ -335,7 +336,7 @@
             instTotal += parseFloat(f.actualIMC || 0) + parseFloat(f.hood || 0) + parseFloat(f.ftd || 0) + parseFloat(f.ifrAppr || 0);
         });
 
-        // Bottom footer totals removed as requested
+        // Bottom footer removed completely
         document.getElementById('logbook-tfoot').innerHTML = '';
 
         document.getElementById('grand-total-time').textContent = (seTotal + meTotal).toFixed(1);
@@ -519,7 +520,7 @@
 
     window.onload = () => {
         loadFromFirebase();
-        console.log('%c✅ Totals placed between Add New Flight and entries count - bottom totals removed', 'color:#0a2540; font-weight:600');
+        console.log('%c✅ Totals placed between button and entries count - bottom footer removed', 'color:#0a2540; font-weight:600');
     };
 </script>
 </body>
