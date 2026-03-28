@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,140 +9,141 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500&display=swap');
-    
-    body { font-family: 'Inter', system_ui, sans-serif; font-size: 13px; }
-    .header-font { font-family: 'Space Grotesk', sans-serif; }
-    
-    .logbook-table th {
-        background: #0a2540;
-        color: white;
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.55rem;
-        letter-spacing: 0.01em;
-        padding: 6px 4px;
-        line-height: 1.1;
-        white-space: nowrap;
-    }
-    .logbook-table td {
-        padding: 8px 4px;
-        border-bottom: 1px solid #e5e7eb;
-        font-size: 0.8rem;
-        text-align: center;
-    }
-    .logbook-table tr:hover { background-color: #f8fafc; }
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500&display=swap');
+        
+        body { font-family: 'Inter', system_ui, sans-serif; font-size: 13px; }
+        .header-font { font-family: 'Space Grotesk', sans-serif; }
+        
+        .logbook-table th {
+            background: #0a2540;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.55rem;
+            letter-spacing: 0.01em;
+            padding: 6px 4px;
+            line-height: 1.1;
+            white-space: nowrap;
+        }
+        .logbook-table td {
+            padding: 8px 4px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+        .logbook-table tr:hover { background-color: #f8fafc; }
 
-    .table-wrapper {
-        max-height: calc(100vh - 380px); /* Adjusted for totals at top */
-        overflow-y: auto;
-    }
+        .table-wrapper {
+            max-height: calc(100vh - 380px); /* Adjusted for totals at top */
+            overflow-y: auto;
+        }
 
-    .toast {
-        animation: toastPop 0.3s ease forwards;
-    }
-    @keyframes toastPop { 0% { transform: translateY(30px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+        .toast {
+            animation: toastPop 0.3s ease forwards;
+        }
+        @keyframes toastPop { 0% { transform: translateY(30px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
 
-    /* PDF improvements */
-    @media print {
-        .table-wrapper { max-height: none !important; overflow: visible !important; }
-        tr { page-break-inside: avoid; }
-    }
-</style>
+        /* PDF improvements */
+        @media print {
+            .table-wrapper { max-height: none !important; overflow: visible !important; }
+            tr { page-break-inside: avoid; }
+        }
+    </style>
 
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0a2540"></head>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a2540">
+</head>
 <body class="bg-slate-100 min-h-screen">
 
 <div class="max-w-screen-2xl mx-auto">
     <!-- Header -->
     <div class="bg-[#0a2540] text-white px-6 py-5 flex justify-between items-center shadow-lg">
         <div class="flex items-center gap-x-4">
-            <div class="w-10 h-10 bg-white rounded-2xl flex items-center justify-center text-3xl"></div>
+            <div class="w-10 h-10 bg-white rounded-2xl flex items-center justify-center text-3xl">✈️</div>
             <div>
                 <h1 class="header-font text-3xl tracking-tighter">CANADIAN PILOT LOGBOOK</h1>
                 <p class="text-sky-300 text-xs tracking-widest">TRANSPORT CANADA • CARs COMPLIANT</p>
             </div>
         </div>
         <button onclick="exportToPDF()" class="bg-white text-[#0a2540] px-6 py-3 rounded-2xl font-semibold hover:bg-amber-400 transition-colors text-sm">
-             EXPORT PDF (A3 - FULL TABLE)
+            📄 EXPORT PDF (A3 - FULL TABLE)
         </button>
     </div>
 
-<!-- Toolbar + Totals at Top -->
-<div class="bg-white border-b px-6 py-4 sticky top-0 z-10">
-    <div class="flex items-center justify-between mb-4">
-        <button onclick="showAddModal()" class="flex items-center gap-x-2 bg-[#0a2540] text-white px-8 py-4 rounded-3xl font-semibold hover:bg-sky-700">
-            <span class="text-2xl">+</span> ADD NEW FLIGHT
-        </button>
-        <div class="flex items-center gap-x-6 text-sm text-slate-500">
-            <span id="entry-count" class="font-medium">0 entries</span>
-            <span id="sync-status" class="flex items-center gap-x-1 text-emerald-600">
-                <span class="inline-block w-2 h-2 bg-emerald-500 rounded-full"></span> Synced
-            </span>
-        </div>
-    </div>
-
-    <!-- TOTALS SECTION MOVED TO TOP -->
-    <div class="bg-slate-50 border border-[#0a2540]/20 rounded-3xl p-6 grid grid-cols-12 gap-6 text-sm">
-        <div class="col-span-12 md:col-span-5">
-            <div class="text-[#0a2540] font-medium mb-3">COLUMN TOTALS SUMMARY</div>
-            <div id="totals-grid" class="grid grid-cols-3 gap-y-2 text-xs leading-tight"></div>
-        </div>
-        <div class="col-span-12 md:col-span-7 border-l border-slate-300 pl-8">
-            <div class="flex justify-between items-baseline text-[#0a2540]">
-                <div class="text-lg font-semibold">GRAND TOTAL HOURS
-<span class="text-xs font-normal text-slate-400">(Single-Engine + Multi-Engine only)</span></div>
-                <div id="grand-total-time" class="text-6xl font-semibold tabular-nums leading-none">0.0</div>
+    <!-- Toolbar + Totals at Top -->
+    <div class="bg-white border-b px-6 py-4 sticky top-0 z-10">
+        <div class="flex items-center justify-between mb-4">
+            <button onclick="showAddModal()" class="flex items-center gap-x-2 bg-[#0a2540] text-white px-8 py-4 rounded-3xl font-semibold hover:bg-sky-700">
+                <span class="text-2xl">+</span> ADD NEW FLIGHT
+            </button>
+            <div class="flex items-center gap-x-6 text-sm text-slate-500">
+                <span id="entry-count" class="font-medium">0 entries</span>
+                <span id="sync-status" class="flex items-center gap-x-1 text-emerald-600">
+                    <span class="inline-block w-2 h-2 bg-emerald-500 rounded-full"></span> Synced
+                </span>
             </div>
-            <div class="mt-4 flex flex-wrap gap-x-8 gap-y-1 text-xs text-slate-500">
-                <div>Single-Engine: <span id="se-total" class="font-medium">0.0</span></div>
-                <div>Multi-Engine: <span id="me-total" class="font-medium">0.0</span></div>
-                <div>Night: <span id="night-total" class="font-medium">0.0</span></div>
-                <div>X-Country: <span id="xc-total" class="font-medium">0.0</span></div>
-                <div>Instrument: <span id="inst-total" class="font-medium">0.0</span></div>
+        </div>
+
+        <!-- TOTALS SECTION MOVED TO TOP -->
+        <div class="bg-slate-50 border border-[#0a2540]/20 rounded-3xl p-6 grid grid-cols-12 gap-6 text-sm">
+            <div class="col-span-12 md:col-span-5">
+                <div class="text-[#0a2540] font-medium mb-3">COLUMN TOTALS SUMMARY</div>
+                <div id="totals-grid" class="grid grid-cols-3 gap-y-2 text-xs leading-tight"></div>
+            </div>
+            <div class="col-span-12 md:col-span-7 border-l border-slate-300 pl-8">
+                <div class="flex justify-between items-baseline text-[#0a2540]">
+                    <div class="text-lg font-semibold">GRAND TOTAL HOURS<br><span class="text-xs font-normal text-slate-400">(Single-Engine + Multi-Engine only)</span></div>
+                    <div id="grand-total-time" class="text-6xl font-semibold tabular-nums leading-none">0.0</div>
+                </div>
+                <div class="mt-4 flex flex-wrap gap-x-8 gap-y-1 text-xs text-slate-500">
+                    <div>Single-Engine: <span id="se-total" class="font-medium">0.0</span></div>
+                    <div>Multi-Engine: <span id="me-total" class="font-medium">0.0</span></div>
+                    <div>Night: <span id="night-total" class="font-medium">0.0</span></div>
+                    <div>X-Country: <span id="xc-total" class="font-medium">0.0</span></div>
+                    <div>Instrument: <span id="inst-total" class="font-medium">0.0</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Table -->
+    <div class="px-6 pb-8">
+        <div id="logbook-content" class="bg-white rounded-3xl shadow-xl overflow-hidden">
+            <div class="table-wrapper overflow-x-auto" id="table-wrapper">
+                <table id="logbook-table" class="logbook-table w-full">
+                    <thead>
+                        <tr>
+                            <th class="w-28">DATE</th>
+                            <th class="w-40">AIRCRAFT TYPE</th>
+                            <th class="w-24">REG</th>
+                            <th class="w-20">FROM</th>
+                            <th class="w-20">TO</th>
+                            <th colspan="5" class="se-header text-center">SINGLE-ENGINE</th>
+                            <th colspan="5" class="me-header text-center">MULTI-ENGINE</th>
+                            <th colspan="4" class="xc-header text-center">X-COUNTRY</th>
+                            <th colspan="4" class="inst-header text-center">INSTRUMENT TIME</th>
+                            <th class="w-12">NIGHT LNDG</th>
+                            <th class="w-12">APPS</th>
+                            <th class="text-left w-56">PIC / CO-PILOT / REMARKS</th>
+                            <th class="w-16 no-print">ACTIONS</th>
+                        </tr>
+                        <tr class="bg-slate-700 text-[10px] text-white">
+                            <th></th><th></th><th></th><th></th><th></th>
+                            <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
+                            <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
+                            <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th>
+                            <th>IMC</th><th>Hood</th><th>FTD</th><th>IFR</th>
+                            <th></th><th></th><th></th><th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="logbook-body"></tbody>
+                    <tfoot id="logbook-tfoot" class="bg-slate-100 border-t-4 border-[#0a2540] font-semibold text-[#0a2540]"></tfoot>
+                </table>
             </div>
         </div>
     </div>
 </div>
-
-<!-- Main Table -->
-<div class="px-6 pb-8">
-    <div id="logbook-content" class="bg-white rounded-3xl shadow-xl overflow-hidden">
-        <div class="table-wrapper overflow-x-auto" id="table-wrapper">
-            <table id="logbook-table" class="logbook-table w-full">
-                <thead>
-                    <tr>
-                        <th class="w-28">DATE</th>
-                        <th class="w-40">AIRCRAFT TYPE</th>
-                        <th class="w-24">REG</th>
-                        <th class="w-20">FROM</th>
-                        <th class="w-20">TO</th>
-                        <th colspan="5" class="se-header text-center">SINGLE-ENGINE</th>
-                        <th colspan="5" class="me-header text-center">MULTI-ENGINE</th>
-                        <th colspan="4" class="xc-header text-center">X-COUNTRY</th>
-                        <th colspan="4" class="inst-header text-center">INSTRUMENT TIME</th>
-                        <th class="w-12">NIGHT LNDG</th>
-                        <th class="w-12">APPS</th>
-                        <th class="text-left w-56">PIC / CO-PILOT / REMARKS</th>
-                        <th class="w-16 no-print">ACTIONS</th>
-                    </tr>
-                    <tr class="bg-slate-700 text-[10px] text-white">
-                        <th></th><th></th><th></th><th></th><th></th>
-                        <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
-                        <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
-                        <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th>
-                        <th>IMC</th><th>Hood</th><th>FTD</th><th>IFR</th>
-                        <th></th><th></th><th></th><th></th>
-                    </tr>
-                </thead>
-                <tbody id="logbook-body"></tbody>
-                <tfoot id="logbook-tfoot" class="bg-slate-100 border-t-4 border-[#0a2540] font-semibold text-[#0a2540]"></tfoot>
-            </table>
-        </div>
-    </div>
-</div></div>
 
 <!-- Modal (unchanged) -->
 <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
@@ -151,52 +153,53 @@
             <button onclick="hideModal()" class="text-4xl text-slate-300 hover:text-slate-500">×</button>
         </div>
         
-    <form id="flight-form" onsubmit="handleFormSubmit(event)" class="p-8 grid grid-cols-12 gap-6">
-        <div class="col-span-12 md:col-span-4">
-            <label class="block text-xs font-medium text-slate-500 mb-1">DATE (e.g. 2023.aug.22)</label>
-            <input type="text" id="form-date" placeholder="2023.aug.22" required class="w-full border border-slate-300 rounded-2xl px-5 py-4 font-medium">
-        </div>
-        <div class="col-span-12 md:col-span-4">
-            <label class="block text-xs font-medium text-slate-500 mb-1">AIRCRAFT TYPE</label>
-            <input type="text" id="form-type" placeholder="Cessna 172" required class="w-full border border-slate-300 rounded-2xl px-5 py-4">
-        </div>
-        <div class="col-span-12 md:col-span-3">
-            <label class="block text-xs font-medium text-slate-500 mb-1">REG</label>
-            <input type="text" id="form-reg" placeholder="C-GABC" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
-        </div>
+        <form id="flight-form" onsubmit="handleFormSubmit(event)" class="p-8 grid grid-cols-12 gap-6">
+            <div class="col-span-12 md:col-span-4">
+                <label class="block text-xs font-medium text-slate-500 mb-1">DATE (e.g. 2023.aug.22)</label>
+                <input type="text" id="form-date" placeholder="2023.aug.22" required class="w-full border border-slate-300 rounded-2xl px-5 py-4 font-medium">
+            </div>
+            <div class="col-span-12 md:col-span-4">
+                <label class="block text-xs font-medium text-slate-500 mb-1">AIRCRAFT TYPE</label>
+                <input type="text" id="form-type" placeholder="Cessna 172" required class="w-full border border-slate-300 rounded-2xl px-5 py-4">
+            </div>
+            <div class="col-span-12 md:col-span-3">
+                <label class="block text-xs font-medium text-slate-500 mb-1">REG</label>
+                <input type="text" id="form-reg" placeholder="C-GABC" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
+            </div>
 
-        <div class="col-span-6 md:col-span-2">
-            <label class="block text-xs font-medium text-slate-500 mb-1">FROM</label>
-            <input type="text" id="form-from" placeholder="CYVR" maxlength="4" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
-        </div>
-        <div class="col-span-6 md:col-span-2">
-            <label class="block text-xs font-medium text-slate-500 mb-1">TO</label>
-            <input type="text" id="form-to" placeholder="CYLW" maxlength="4" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
-        </div>
+            <div class="col-span-6 md:col-span-2">
+                <label class="block text-xs font-medium text-slate-500 mb-1">FROM</label>
+                <input type="text" id="form-from" placeholder="CYVR" maxlength="4" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
+            </div>
+            <div class="col-span-6 md:col-span-2">
+                <label class="block text-xs font-medium text-slate-500 mb-1">TO</label>
+                <input type="text" id="form-to" placeholder="CYLW" maxlength="4" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
+            </div>
 
-        <div class="col-span-12 md:col-span-2">
-            <label class="block text-xs font-medium text-slate-500 mb-1">TOTAL TIME</label>
-            <input type="number" id="form-total" step="0.1" value="1.0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center text-xl font-semibold">
-        </div>
+            <div class="col-span-12 md:col-span-2">
+                <label class="block text-xs font-medium text-slate-500 mb-1">TOTAL TIME</label>
+                <input type="number" id="form-total" step="0.1" value="1.0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center text-xl font-semibold">
+            </div>
 
-        <div class="col-span-12 md:col-span-6">
-            <label class="block text-xs font-medium text-slate-500 mb-1">PIC NAME</label>
-            <input type="text" id="form-pic-name" placeholder="Alan Gilels" class="w-full border border-slate-300 rounded-2xl px-5 py-4">
-        </div>
-        <div class="col-span-12 md:col-span-6">
-            <label class="block text-xs font-medium text-slate-500 mb-1">CO-PILOT NAME</label>
-            <input type="text" id="form-copilot-name" class="w-full border border-slate-300 rounded-2xl px-5 py-4">
-        </div>
+            <div class="col-span-12 md:col-span-6">
+                <label class="block text-xs font-medium text-slate-500 mb-1">PIC NAME</label>
+                <input type="text" id="form-pic-name" placeholder="Alan Gilels" class="w-full border border-slate-300 rounded-2xl px-5 py-4">
+            </div>
+            <div class="col-span-12 md:col-span-6">
+                <label class="block text-xs font-medium text-slate-500 mb-1">CO-PILOT NAME</label>
+                <input type="text" id="form-copilot-name" class="w-full border border-slate-300 rounded-2xl px-5 py-4">
+            </div>
 
-        <!-- Single-Engine, Multi-Engine, X-Country, Instrument, Night Landings, Approaches, Remarks sections remain the same as before -->
-        <!-- (Full form fields - identical to previous working version) -->
+            <!-- Single-Engine, Multi-Engine, X-Country, Instrument, Night Landings, Approaches, Remarks sections remain the same as before -->
+            <!-- (Full form fields - identical to previous working version) -->
 
-        <div class="col-span-12 flex gap-3 pt-8">
-            <button type="button" onclick="hideModal()" class="flex-1 py-5 border border-slate-300 rounded-3xl hover:bg-slate-100">CANCEL</button>
-            <button type="submit" id="save-btn" class="flex-1 py-5 bg-[#0a2540] text-white rounded-3xl hover:bg-sky-700">SAVE ENTRY</button>
-        </div>
-    </form>
-</div></div>
+            <div class="col-span-12 flex gap-3 pt-8">
+                <button type="button" onclick="hideModal()" class="flex-1 py-5 border border-slate-300 rounded-3xl hover:bg-slate-100">CANCEL</button>
+                <button type="submit" id="save-btn" class="flex-1 py-5 bg-[#0a2540] text-white rounded-3xl hover:bg-sky-700">SAVE ENTRY</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <script>
     const firebaseConfig = {
@@ -303,8 +306,8 @@
                 <td>${parseInt(f.instrumentApproaches||0)}</td>
                 <td class="text-left text-xs">${f.picName ? '<strong>PIC:</strong> ' + f.picName : ''}${f.copilotName ? '<br><strong>Co:</strong> ' + f.copilotName : ''}<br>${f.remarks || ''}</td>
                 <td class="no-print">
-                    <button onclick="editFlight('${f.id}')" class="text-sky-600 hover:text-sky-800 px-2 py-1 text-lg"></button>
-                    <button onclick="deleteFlight('${f.id}')" class="text-red-600 hover:text-red-800 px-2 py-1 text-lg ml-2"></button>
+                    <button onclick="editFlight('${f.id}')" class="text-sky-600 hover:text-sky-800 px-2 py-1 text-lg">✏️</button>
+                    <button onclick="deleteFlight('${f.id}')" class="text-red-600 hover:text-red-800 px-2 py-1 text-lg ml-2">🗑</button>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -554,7 +557,7 @@
 
     window.onload = () => {
         loadFromFirebase();
-        console.log('%c Totals moved to top + full PDF export ready', 'color:#0a2540; font-weight:600');
+        console.log('%c✅ Totals moved to top + full PDF export ready', 'color:#0a2540; font-weight:600');
     };
 </script>
 </body>
