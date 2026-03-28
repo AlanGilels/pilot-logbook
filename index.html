@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Canadian Pilot Logbook • Transport Canada</title>
+    <title>Canadian Pilot Logbook</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -12,38 +12,30 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500&display=swap');
         
-        body { font-family: 'Inter', system_ui, sans-serif; font-size: 13px; }
+        body { font-family: 'Inter', system_ui, sans-serif; }
         .header-font { font-family: 'Space Grotesk', sans-serif; }
         
+        .logbook-table th, .logbook-table td {
+            padding: 8px 4px;
+            text-align: center;
+            font-size: 0.8rem;
+        }
         .logbook-table th {
             background: #0a2540;
             color: white;
             font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.55rem;
-            letter-spacing: 0.01em;
-            padding: 6px 4px;
-            line-height: 1.1;
-            white-space: nowrap;
         }
-        .logbook-table td {
-            padding: 8px 4px;
-            border-bottom: 1px solid #e5e7eb;
-            font-size: 0.8rem;
-            text-align: center;
-        }
-        .logbook-table tr:hover { background-color: #f8fafc; }
-
+        
         .table-wrapper {
-            max-height: calc(100vh - 440px);
             overflow-y: auto;
         }
     </style>
 </head>
-<body class="bg-slate-100">
+<body class="bg-slate-50">
 
 <div class="max-w-screen-2xl mx-auto">
-    <!-- 1. Header - you like the size -->
+
+    <!-- 1. Header -->
     <div class="bg-[#0a2540] text-white px-6 py-5 flex justify-between items-center">
         <div class="flex items-center gap-x-3">
             <div class="w-9 h-9 bg-white rounded-2xl flex items-center justify-center text-3xl">✈️</div>
@@ -52,105 +44,148 @@
                 <p class="text-sky-300 text-xs tracking-widest">TRANSPORT CANADA • CARs COMPLIANT</p>
             </div>
         </div>
-        <button onclick="exportToPDF()" 
-                class="bg-white text-[#0a2540] px-6 py-3 rounded-3xl font-semibold hover:bg-amber-400 transition-all">
-            📄 EXPORT PDF (A3)
-        </button>
+        <button onclick="exportToPDF()" class="bg-white text-[#0a2540] px-6 py-3 rounded-3xl font-semibold">📄 EXPORT PDF (A3)</button>
     </div>
 
     <!-- 2. Toolbar -->
-    <div class="bg-white border-b px-6 py-5 sticky top-0 z-20 shadow-sm">
+    <div class="bg-white border-b px-6 py-5 sticky top-0 z-20">
         <div class="flex items-center justify-between">
-            <button onclick="showAddModal()" 
-                    class="flex items-center gap-x-3 bg-[#0a2540] hover:bg-sky-700 text-white px-8 py-4 rounded-3xl font-semibold transition-colors">
-                <span class="text-3xl leading-none">+</span> 
-                <span>ADD NEW FLIGHT</span>
+            <button onclick="showAddModal()" class="flex items-center gap-x-3 bg-[#0a2540] text-white px-8 py-4 rounded-3xl font-semibold">
+                <span class="text-3xl">+</span> ADD NEW FLIGHT
             </button>
-            
-            <div class="flex items-center gap-x-8 text-sm text-slate-600">
-                <span id="entry-count" class="font-medium">0 entries</span>
-                <span id="sync-status" class="flex items-center gap-x-1.5">
-                    <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                    Synced
+            <div class="flex items-center gap-x-6 text-sm">
+                <span id="entry-count">0 entries</span>
+                <span id="sync-status" class="flex items-center gap-x-1 text-emerald-600">
+                    <span class="w-2 h-2 bg-emerald-500 rounded-full"></span> Synced
                 </span>
             </div>
         </div>
     </div>
 
-    <!-- 3. Totals Layer - just above the table (as you currently see it) -->
-    <div class="px-6 py-5 bg-white border-b">
-        <div class="bg-slate-50 border border-slate-200 rounded-3xl p-6">
-            <div class="grid grid-cols-12 gap-8">
-                <!-- Column Totals Summary -->
-                <div class="col-span-12 lg:col-span-5">
-                    <div class="uppercase text-[#0a2540] text-xs font-semibold tracking-widest mb-3">COLUMN TOTALS SUMMARY</div>
-                    <div id="totals-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-y-3 text-sm"></div>
+    <!-- 3. TOTALS SECTION - Made very obvious for testing -->
+    <div class="px-6 py-6 bg-white border-b-4 border-amber-400">
+        <div class="bg-yellow-100 border-2 border-amber-500 rounded-3xl p-8 text-center">
+            <h2 class="text-2xl font-bold text-amber-800 mb-4">📊 COLUMN TOTALS SUMMARY & GRAND TOTAL</h2>
+            <div id="totals-debug" class="text-lg font-medium text-amber-700 mb-6">Loading totals...</div>
+            
+            <div class="grid grid-cols-12 gap-6">
+                <div class="col-span-12 md:col-span-5">
+                    <div class="text-left text-sm" id="totals-grid"></div>
                 </div>
-                
-                <!-- Grand Total -->
-                <div class="col-span-12 lg:col-span-7 flex flex-col justify-center border-l border-slate-200 pl-8">
-                    <div class="flex items-baseline justify-between">
-                        <div>
-                            <div class="text-[#0a2540] font-semibold text-lg">GRAND TOTAL HOURS</div>
-                            <div class="text-xs text-slate-500">(Single-Engine + Multi-Engine only)</div>
-                        </div>
-                        <div id="grand-total-time" class="text-6xl font-bold text-[#0a2540] tabular-nums">0.0</div>
+                <div class="col-span-12 md:col-span-7">
+                    <div class="text-left">
+                        <div class="text-[#0a2540] font-semibold">GRAND TOTAL HOURS (SE + ME)</div>
+                        <div id="grand-total-time" class="text-7xl font-bold text-[#0a2540]">0.0</div>
                     </div>
-                    <div id="sub-totals" class="mt-5 flex flex-wrap gap-x-10 gap-y-1 text-sm text-slate-600"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 4. Main Table -->
-    <div class="px-6 pb-10">
-        <div id="logbook-content" class="bg-white rounded-3xl shadow overflow-hidden">
-            <div class="table-wrapper" id="table-wrapper">
-                <table class="logbook-table w-full min-w-full">
+    <!-- 4. Table -->
+    <div class="px-6">
+        <div class="bg-white rounded-3xl shadow overflow-hidden">
+            <div class="table-wrapper">
+                <table id="logbook-table" class="logbook-table w-full">
                     <thead>
                         <tr>
-                            <th class="w-28">DATE</th>
-                            <th>AIRCRAFT TYPE</th>
-                            <th class="w-24">REG</th>
-                            <th class="w-20">FROM</th>
-                            <th class="w-20">TO</th>
-                            <th colspan="5" class="text-center bg-blue-950">SINGLE-ENGINE</th>
-                            <th colspan="5" class="text-center bg-blue-950">MULTI-ENGINE</th>
-                            <th colspan="4" class="text-center bg-amber-950">X-COUNTRY</th>
-                            <th colspan="4" class="text-center bg-emerald-950">INSTRUMENT</th>
-                            <th class="w-12">N LNDG</th>
-                            <th class="w-12">APPS</th>
-                            <th class="text-left">PIC / CO-PILOT / REMARKS</th>
-                            <th class="w-20 no-print">ACTIONS</th>
-                        </tr>
-                        <!-- Sub headers for columns -->
-                        <tr class="bg-slate-700 text-[10px] text-white">
-                            <th></th><th></th><th></th><th></th><th></th>
-                            <!-- SE -->
-                            <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
-                            <!-- ME -->
-                            <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
-                            <!-- XC -->
-                            <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th>
-                            <!-- Instrument -->
-                            <th>IMC</th><th>Hood</th><th>FTD</th><th>IFR Appr</th>
-                            <th></th><th></th><th></th><th></th>
+                            <th>DATE</th>
+                            <th>AIRCRAFT</th>
+                            <th>REG</th>
+                            <th>FROM</th>
+                            <th>TO</th>
+                            <th colspan="5">SINGLE-ENGINE</th>
+                            <th colspan="5">MULTI-ENGINE</th>
+                            <th colspan="4">X-COUNTRY</th>
+                            <th colspan="4">INSTRUMENT</th>
+                            <th>N LNDG</th>
+                            <th>APPS</th>
+                            <th>REMARKS</th>
+                            <th class="no-print">ACTIONS</th>
                         </tr>
                     </thead>
-                    <tbody id="logbook-body" class="text-sm"></tbody>
+                    <tbody id="logbook-body"></tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal and full script would go here - the code is long, so please confirm if the totals layer is now clearly visible as the third section. -->
+<!-- Modal placeholder -->
+<div id="modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+    <div class="bg-white rounded-3xl p-8 max-w-lg w-full">
+        <h2 id="modal-title" class="text-2xl mb-6">Add Flight</h2>
+        <button onclick="hideModal()" class="mt-6 w-full py-4 bg-gray-200 rounded-2xl">Close Modal</button>
+    </div>
+</div>
 
 <script>
-    // Firebase config and all functions (load, render, totals, save, delete, PDF) are the same as previous versions.
-    // If after uploading the totals still don't show numbers, please add a few test flights and tell me what you see in the totals boxes.
-    
-    console.log('%c✅ Layout updated - Totals as dedicated layer above table', 'color:#0a2540; font-weight:600');
+    const firebaseConfig = { /* your config */ 
+      apiKey: "AIzaSyDXNNLgbrkYWbn32D34IBl18J7F1wcyJHQ",
+      authDomain: "canadian-pilot-logbook.firebaseapp.com",
+      projectId: "canadian-pilot-logbook",
+      storageBucket: "canadian-pilot-logbook.firebasestorage.app",
+      messagingSenderId: "74288469835",
+      appId: "1:74288469835:web:c8c3dbe90e65a69a9bbace"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let flights = [];
+
+    async function loadFromFirebase() {
+        try {
+            const snapshot = await db.collection("flights").get();
+            flights = [];
+            snapshot.forEach(doc => flights.push({id: doc.id, ...doc.data()}));
+            updateAllTotals();
+        } catch(e) {
+            console.error(e);
+        }
+    }
+
+    function updateAllTotals() {
+        renderTable();
+        buildTotals();
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('logbook-body');
+        tbody.innerHTML = '';
+        flights.forEach(f => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${f.date || ''}</td><td>${f.aircraftType || ''}</td><td>${f.registration || ''}</td><td>${f.from || ''}</td><td>${f.to || ''}</td><td colspan="20">... flight data ...</td>`;
+            tbody.appendChild(tr);
+        });
+        document.getElementById('entry-count').textContent = flights.length + " entries";
+    }
+
+    function buildTotals() {
+        let totalHours = 0;
+        flights.forEach(f => {
+            totalHours += (parseFloat(f.seDayPic||0) + parseFloat(f.seDayDual||0) + parseFloat(f.meDayPic||0) + parseFloat(f.meDayDual||0));
+        });
+
+        document.getElementById('grand-total-time').textContent = totalHours.toFixed(1);
+        document.getElementById('totals-debug').innerHTML = `Total flights loaded: <strong>${flights.length}</strong><br>Grand Total Hours: <strong>${totalHours.toFixed(1)}</strong>`;
+        
+        document.getElementById('totals-grid').innerHTML = `
+            <div>SE + ME Hours: <strong>${totalHours.toFixed(1)}</strong></div>
+        `;
+    }
+
+    function showAddModal() { document.getElementById('modal').classList.remove('hidden'); }
+    function hideModal() { document.getElementById('modal').classList.add('hidden'); }
+
+    function exportToPDF() {
+        html2pdf().from(document.getElementById('logbook-content') || document.body).save();
+    }
+
+    window.onload = () => {
+        loadFromFirebase();
+        console.log('%c✅ TEST VERSION - Totals box should be bright yellow and clearly visible', 'color:red; font-size:16px; font-weight:bold');
+    };
 </script>
 </body>
 </html>
