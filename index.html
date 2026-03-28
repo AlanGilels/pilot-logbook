@@ -39,6 +39,12 @@
             overflow-y: auto;
         }
 
+        /* PDF improvements */
+        @media print {
+            .table-wrapper { max-height: none !important; overflow: visible !important; }
+            tr { page-break-inside: avoid; }
+        }
+
         .toast {
             animation: toastPop 0.3s ease forwards;
         }
@@ -51,6 +57,7 @@
 <body class="bg-slate-100 min-h-screen">
 
 <div class="max-w-screen-2xl mx-auto">
+    <!-- Header -->
     <div class="bg-[#0a2540] text-white px-6 py-5 flex justify-between items-center shadow-lg">
         <div class="flex items-center gap-x-4">
             <div class="w-10 h-10 bg-white rounded-2xl flex items-center justify-center text-3xl">✈️</div>
@@ -60,10 +67,11 @@
             </div>
         </div>
         <button onclick="exportToPDF()" class="bg-white text-[#0a2540] px-6 py-3 rounded-2xl font-semibold hover:bg-amber-400 transition-colors text-sm">
-            📄 EXPORT PDF (A3)
+            📄 EXPORT PDF (A3 - FULL TABLE)
         </button>
     </div>
 
+    <!-- Toolbar -->
     <div class="bg-white border-b px-6 py-4 flex items-center justify-between sticky top-0 z-10">
         <button onclick="showAddModal()" class="flex items-center gap-x-2 bg-[#0a2540] text-white px-8 py-4 rounded-3xl font-semibold hover:bg-sky-700">
             <span class="text-2xl">+</span> ADD NEW FLIGHT
@@ -76,6 +84,7 @@
         </div>
     </div>
 
+    <!-- Table -->
     <div class="px-6 pb-8">
         <div id="logbook-content" class="bg-white rounded-3xl shadow-xl overflow-hidden">
             <div class="table-wrapper overflow-x-auto" id="table-wrapper">
@@ -301,17 +310,15 @@
         }
     }
 
-    // Auto-refresh when app opens or returns to foreground
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
             loadFromFirebase();
         }
     });
 
-    // Custom parser for your date format: 2023.aug.22 or 2023.aug.22..
     function parseCustomDate(dateStr) {
         if (!dateStr) return new Date(0);
-        let cleaned = dateStr.toLowerCase().replace(/\.+ /g, '.').trim();
+        let cleaned = dateStr.toLowerCase().replace(/\.+/g, '.').trim();
         const parts = cleaned.split('.');
         if (parts.length < 3) return new Date(0);
 
@@ -583,18 +590,46 @@
 
     function exportToPDF() {
         const element = document.getElementById('logbook-content');
+        const wrapper = document.getElementById('table-wrapper');
+        const originalMaxHeight = wrapper.style.maxHeight;
+        
+        // Temporarily allow full height for PDF capture
+        wrapper.style.maxHeight = 'none';
+
         const opt = {
-            margin: [0.2, 0.1, 0.2, 0.1],
+            margin: [0.3, 0.2, 0.3, 0.2],
             filename: `Canadian_Pilot_Logbook_${new Date().toISOString().slice(0,10)}.pdf`,
-            html2canvas: { scale: 2.8 },
-            jsPDF: { unit: 'in', format: 'a3', orientation: 'landscape' }
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { 
+                scale: 3.0,
+                useCORS: true,
+                letterRendering: true,
+                scrollY: 0,
+                height: element.scrollHeight
+            },
+            jsPDF: { 
+                unit: 'in', 
+                format: 'a3', 
+                orientation: 'landscape' 
+            },
+            pagebreak: { 
+                mode: ['avoid-all', 'css', 'legacy']
+            }
         };
-        html2pdf().set(opt).from(element).save();
+
+        html2pdf().set(opt).from(element).save().then(() => {
+            wrapper.style.maxHeight = originalMaxHeight;
+            showToast("PDF exported with full table (multiple pages if needed)");
+        }).catch(err => {
+            console.error(err);
+            wrapper.style.maxHeight = originalMaxHeight;
+            showToast("PDF export failed", "error");
+        });
     }
 
     window.onload = () => {
         loadFromFirebase();
-        console.log('%c✅ Full version loaded with 2023.aug.22 date support + auto-refresh', 'color:#0a2540; font-weight:600');
+        console.log('%c✅ Complete logbook with improved full-table PDF export', 'color:#0a2540; font-weight:600');
     };
 </script>
 </body>
