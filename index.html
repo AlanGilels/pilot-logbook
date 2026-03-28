@@ -51,7 +51,7 @@
 <body class="bg-slate-100 min-h-screen">
 
 <div class="max-w-screen-2xl mx-auto">
-    <!-- Smaller Header -->
+    <!-- Header -->
     <div class="bg-[#0a2540] text-white px-6 py-4 flex justify-between items-center shadow-lg">
         <div class="flex items-center gap-x-3">
             <div class="w-8 h-8 bg-white rounded-2xl flex items-center justify-center text-2xl">✈️</div>
@@ -81,9 +81,9 @@
         </div>
     </div>
 
-    <!-- Totals Section - Placed just above the main table -->
-    <div class="px-6 pt-4 pb-2 bg-white">
-        <div class="bg-slate-50 border border-[#0a2540]/20 rounded-3xl p-5 grid grid-cols-12 gap-6 text-sm scale-[0.85] origin-top">
+    <!-- Totals Section - Just above the main table -->
+    <div class="px-6 pt-2 pb-4 bg-white">
+        <div class="bg-slate-50 border border-[#0a2540]/20 rounded-3xl p-5 grid grid-cols-12 gap-6 text-sm">
             <div class="col-span-12 md:col-span-5">
                 <div class="text-[#0a2540] font-medium mb-2 text-base">COLUMN TOTALS SUMMARY</div>
                 <div id="totals-grid" class="grid grid-cols-3 gap-y-2 text-xs leading-tight"></div>
@@ -142,7 +142,7 @@
     </div>
 </div>
 
-<!-- Modal (full form) -->
+<!-- Modal -->
 <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
     <div class="modal bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto">
         <div class="px-8 py-6 border-b sticky top-0 bg-white z-10 flex justify-between">
@@ -199,7 +199,7 @@
                 </div>
             </div>
 
-            <!-- The rest of the modal form fields (Multi-Engine, X-Country, Instrument, etc.) are the same as your previous working version -->
+            <!-- Multi-Engine, X-Country, Instrument, Night Landings, Approaches, Remarks - same as before -->
 
             <div class="col-span-12 flex gap-3 pt-8">
                 <button type="button" onclick="hideModal()" class="flex-1 py-5 border border-slate-300 rounded-3xl hover:bg-slate-100">CANCEL</button>
@@ -210,7 +210,6 @@
 </div>
 
 <script>
-    // Firebase + all functions (same as before)
     const firebaseConfig = {
       apiKey: "AIzaSyDXNNLgbrkYWbn32D34IBl18J7F1wcyJHQ",
       authDomain: "canadian-pilot-logbook.firebaseapp.com",
@@ -521,7 +520,7 @@
 
     window.onload = () => {
         loadFromFirebase();
-        console.log('%c✅ Totals placed just above the table - bottom totals removed', 'color:#0a2540; font-weight:600');
+        console.log('%c✅ Totals placed just above the table', 'color:#0a2540; font-weight:600');
     };
 </script>
 </body>
