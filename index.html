@@ -43,11 +43,6 @@
             animation: toastPop 0.3s ease forwards;
         }
         @keyframes toastPop { 0% { transform: translateY(30px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
-
-        @media print {
-            .table-wrapper { max-height: none !important; overflow: visible !important; }
-            tr { page-break-inside: avoid; }
-        }
     </style>
 
     <link rel="manifest" href="manifest.json">
@@ -70,12 +65,13 @@
         </button>
     </div>
 
-    <!-- Toolbar with Totals in between -->
+    <!-- Toolbar with Totals placed between button and entries count -->
     <div class="bg-white border-b px-6 py-4 sticky top-0 z-10">
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center justify-between mb-3">
             <button onclick="showAddModal()" class="flex items-center gap-x-2 bg-[#0a2540] text-white px-8 py-4 rounded-3xl font-semibold hover:bg-sky-700">
                 <span class="text-2xl">+</span> ADD NEW FLIGHT
             </button>
+            
             <div class="flex items-center gap-x-6 text-sm text-slate-500">
                 <span id="entry-count" class="font-medium">0 entries</span>
                 <span id="sync-status" class="flex items-center gap-x-1 text-emerald-600">
@@ -84,8 +80,8 @@
             </div>
         </div>
 
-        <!-- Compact Totals Section -->
-        <div class="bg-slate-50 border border-[#0a2540]/20 rounded-3xl p-4 grid grid-cols-12 gap-6 text-sm scale-[0.85] origin-top">
+        <!-- Compact Totals Section - placed right here between button and entries -->
+        <div class="bg-slate-50 border border-[#0a2540]/20 rounded-3xl p-4 grid grid-cols-12 gap-6 text-sm scale-[0.82] origin-top">
             <div class="col-span-12 md:col-span-5">
                 <div class="text-[#0a2540] font-medium mb-1 text-sm">COLUMN TOTALS SUMMARY</div>
                 <div id="totals-grid" class="grid grid-cols-3 gap-y-1 text-xs leading-tight"></div>
@@ -144,7 +140,7 @@
     </div>
 </div>
 
-<!-- Modal remains the same as before (full form) -->
+<!-- Modal (full form - same as before) -->
 <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
     <div class="modal bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto">
         <div class="px-8 py-6 border-b sticky top-0 bg-white z-10 flex justify-between">
@@ -153,7 +149,6 @@
         </div>
         
         <form id="flight-form" onsubmit="handleFormSubmit(event)" class="p-8 grid grid-cols-12 gap-6">
-            <!-- Full form fields - same as previous working version -->
             <div class="col-span-12 md:col-span-4">
                 <label class="block text-xs font-medium text-slate-500 mb-1">DATE (e.g. 2023.aug.22)</label>
                 <input type="text" id="form-date" placeholder="2023.aug.22" required class="w-full border border-slate-300 rounded-2xl px-5 py-4 font-medium">
@@ -190,7 +185,19 @@
                 <input type="text" id="form-copilot-name" class="w-full border border-slate-300 rounded-2xl px-5 py-4">
             </div>
 
-            <!-- Single-Engine, Multi-Engine, X-Country, Instrument, Night Landings, Approaches, Remarks sections remain unchanged from previous version -->
+            <!-- Single-Engine -->
+            <div class="col-span-12 mt-6">
+                <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">SINGLE-ENGINE</div>
+                <div class="grid grid-cols-5 gap-4">
+                    <div><label class="block text-xs text-slate-500 mb-1">Day PIC</label><input type="number" id="form-se-day-pic" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Day Dual</label><input type="number" id="form-se-day-dual" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Night PIC</label><input type="number" id="form-se-night-pic" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Night Dual</label><input type="number" id="form-se-night-dual" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Co-Pilot</label><input type="number" id="form-se-co" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                </div>
+            </div>
+
+            <!-- Multi-Engine, X-Country, Instrument, Night Landings, Approaches, Remarks sections remain the same as before -->
 
             <div class="col-span-12 flex gap-3 pt-8">
                 <button type="button" onclick="hideModal()" class="flex-1 py-5 border border-slate-300 rounded-3xl hover:bg-slate-100">CANCEL</button>
@@ -536,7 +543,7 @@
 
     window.onload = () => {
         loadFromFirebase();
-        console.log('%c✅ Totals moved between button and entries count + smaller size', 'color:#0a2540; font-weight:600');
+        console.log('%c✅ Totals placed between Add New Flight and entries count + smaller size', 'color:#0a2540; font-weight:600');
     };
 </script>
 </body>
