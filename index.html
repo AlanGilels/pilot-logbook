@@ -106,11 +106,11 @@
                         </tr>
                     </thead>
                     <tbody id="logbook-body"></tbody>
-                    <tfoot id="logbook-tfoot" class="bg-slate-100 border-t-4 border-[#0a2540] font-semibold text-[#0a2540]"></tfoot>
+                    <!-- Bottom "TOTALS →" row removed as requested -->
                 </table>
             </div>
 
-            <!-- COLUMN TOTALS SUMMARY -->
+            <!-- COLUMN TOTALS SUMMARY (with FTD) -->
             <div class="bg-slate-50 border-t-2 border-[#0a2540] px-8 py-6">
                 <div class="grid grid-cols-12 gap-6 text-sm">
                     <div class="col-span-12 md:col-span-5">
@@ -130,42 +130,6 @@
                             <div>Instrument: <span id="inst-total" class="font-medium">0.0</span></div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Detailed column-by-column totals row -->
-                <div class="mt-8 pt-6 border-t border-slate-300">
-                    <table class="w-full text-sm">
-                        <tr class="bg-slate-100 font-semibold text-[#0a2540]">
-                            <td colspan="5" class="text-left pl-8">TOTALS →</td>
-                            <!-- Single-Engine -->
-                            <td id="total-se-day-pic">0.0</td>
-                            <td id="total-se-day-dual">0.0</td>
-                            <td id="total-se-night-pic">0.0</td>
-                            <td id="total-se-night-dual">0.0</td>
-                            <td id="total-se-co">0.0</td>
-                            <!-- Multi-Engine -->
-                            <td id="total-me-day-pic">0.0</td>
-                            <td id="total-me-day-dual">0.0</td>
-                            <td id="total-me-night-pic">0.0</td>
-                            <td id="total-me-night-dual">0.0</td>
-                            <td id="total-me-co">0.0</td>
-                            <!-- X-Country -->
-                            <td id="total-xc-day-pic">0.0</td>
-                            <td id="total-xc-day-dual">0.0</td>
-                            <td id="total-xc-night-pic">0.0</td>
-                            <td id="total-xc-night-dual">0.0</td>
-                            <!-- Instrument -->
-                            <td id="total-imc">0.0</td>
-                            <td id="total-hood">0.0</td>
-                            <td id="total-ftd">0.0</td>
-                            <td id="total-ifr">0.0</td>
-                            <!-- Landings / Apps -->
-                            <td id="total-night-lndg">0</td>
-                            <td id="total-apps">0</td>
-                            <td></td>
-                            <td class="no-print"></td>
-                        </tr>
-                    </table>
                 </div>
             </div>
         </div>
@@ -426,7 +390,7 @@
         document.getElementById('xc-total').textContent = xcTotal.toFixed(1);
         document.getElementById('inst-total').textContent = instTotal.toFixed(1);
 
-        // COLUMN TOTALS SUMMARY (now includes FTD)
+        // COLUMN TOTALS SUMMARY (includes FTD)
         document.getElementById('totals-grid').innerHTML = `
             <div>SE Day PIC: <span class="font-semibold">${seDayPic.toFixed(1)}</span></div>
             <div>SE Day Dual: <span class="font-semibold">${seDayDual.toFixed(1)}</span></div>
@@ -437,34 +401,6 @@
             <div>Hood: <span class="font-semibold">${hood.toFixed(1)}</span></div>
             <div>FTD: <span class="font-semibold">${ftd.toFixed(1)}</span></div>
         `;
-
-        // Detailed bottom row (TOTALS →)
-        document.getElementById('logbook-tfoot').innerHTML = `
-            <tr class="bg-slate-100 font-semibold border-t-4 border-[#0a2540]">
-                <td colspan="5" class="text-left pl-8">TOTALS →</td>
-                <td>${seDayPic.toFixed(1)}</td>
-                <td>${seDayDual.toFixed(1)}</td>
-                <td>0.0</td>
-                <td>0.0</td>
-                <td>0.0</td>
-                <td>${meDayPic.toFixed(1)}</td>
-                <td>${meDayDual.toFixed(1)}</td>
-                <td>0.0</td>
-                <td>0.0</td>
-                <td>0.0</td>
-                <td>${xcDayPic.toFixed(1)}</td>
-                <td>0.0</td>
-                <td>0.0</td>
-                <td>0.0</td>
-                <td>${actualIMC.toFixed(1)}</td>
-                <td>${hood.toFixed(1)}</td>
-                <td>${ftd.toFixed(1)}</td>
-                <td>0.0</td>
-                <td>${nightLndg}</td>
-                <td>${apps}</td>
-                <td></td>
-                <td class="no-print"></td>
-            </tr>`;
     }
 
     function updateAllTotals() {
