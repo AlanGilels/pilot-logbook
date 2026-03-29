@@ -115,7 +115,7 @@
             <!-- COLUMN TOTALS SUMMARY - ALL COLUMNS -->
             <div class="bg-slate-50 border-t-2 border-[#0a2540] px-8 py-8">
                 <div class="text-[#0a2540] font-medium mb-4 text-lg">COLUMN TOTALS SUMMARY</div>
-                <div id="totals-grid" class="grid grid-cols-4 md:grid-cols-6 gap-x-8 gap-y-4 text-sm"></div>
+                <div id="totals-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm leading-relaxed"></div>
             </div>
         </div>
     </div>
@@ -405,30 +405,30 @@
 
         document.getElementById('grand-total-time').textContent = grandTotal;
 
-        // Full COLUMN TOTALS SUMMARY with every column
+        // All columns totals
         document.getElementById('totals-grid').innerHTML = `
-            <div>SE Day PIC: <span class="font-semibold">${seDayPic.toFixed(1)}</span></div>
-            <div>SE Day Dual: <span class="font-semibold">${seDayDual.toFixed(1)}</span></div>
-            <div>SE Night PIC: <span class="font-semibold">${seNightPic.toFixed(1)}</span></div>
-            <div>SE Night Dual: <span class="font-semibold">${seNightDual.toFixed(1)}</span></div>
-            <div>SE Co: <span class="font-semibold">${seCo.toFixed(1)}</span></div>
+            <div><strong>SE Day PIC:</strong> ${seDayPic.toFixed(1)}</div>
+            <div><strong>SE Day Dual:</strong> ${seDayDual.toFixed(1)}</div>
+            <div><strong>SE Night PIC:</strong> ${seNightPic.toFixed(1)}</div>
+            <div><strong>SE Night Dual:</strong> ${seNightDual.toFixed(1)}</div>
+            <div><strong>SE Co:</strong> ${seCo.toFixed(1)}</div>
 
-            <div>ME Day PIC: <span class="font-semibold">${meDayPic.toFixed(1)}</span></div>
-            <div>ME Day Dual: <span class="font-semibold">${meDayDual.toFixed(1)}</span></div>
-            <div>ME Night PIC: <span class="font-semibold">${meNightPic.toFixed(1)}</span></div>
-            <div>ME Night Dual: <span class="font-semibold">${meNightDual.toFixed(1)}</span></div>
-            <div>ME Co: <span class="font-semibold">${meCo.toFixed(1)}</span></div>
+            <div><strong>ME Day PIC:</strong> ${meDayPic.toFixed(1)}</div>
+            <div><strong>ME Day Dual:</strong> ${meDayDual.toFixed(1)}</div>
+            <div><strong>ME Night PIC:</strong> ${meNightPic.toFixed(1)}</div>
+            <div><strong>ME Night Dual:</strong> ${meNightDual.toFixed(1)}</div>
+            <div><strong>ME Co:</strong> ${meCo.toFixed(1)}</div>
 
-            <div>XC Day PIC: <span class="font-semibold">${xcDayPic.toFixed(1)}</span></div>
-            <div>XC Day Dual: <span class="font-semibold">${xcDayDual.toFixed(1)}</span></div>
-            <div>XC Night PIC: <span class="font-semibold">${xcNightPic.toFixed(1)}</span></div>
-            <div>XC Night Dual: <span class="font-semibold">${xcNightDual.toFixed(1)}</span></div>
+            <div><strong>XC Day PIC:</strong> ${xcDayPic.toFixed(1)}</div>
+            <div><strong>XC Day Dual:</strong> ${xcDayDual.toFixed(1)}</div>
+            <div><strong>XC Night PIC:</strong> ${xcNightPic.toFixed(1)}</div>
+            <div><strong>XC Night Dual:</strong> ${xcNightDual.toFixed(1)}</div>
 
-            <div>Actual IMC: <span class="font-semibold">${actualIMC.toFixed(1)}</span></div>
-            <div>Hood: <span class="font-semibold">${hood.toFixed(1)}</span></div>
-            <div>FTD: <span class="font-semibold">${ftd.toFixed(1)}</span></div>
-            <div>IFR Appr: <span class="font-semibold">${ifrAppr.toFixed(1)}</span></div>
-            <div>Night LNDG: <span class="font-semibold">${nightLandings}</span></div>
+            <div><strong>Actual IMC:</strong> ${actualIMC.toFixed(1)}</div>
+            <div><strong>Hood:</strong> ${hood.toFixed(1)}</div>
+            <div><strong>FTD:</strong> ${ftd.toFixed(1)}</div>
+            <div><strong>IFR Appr:</strong> ${ifrAppr.toFixed(1)}</div>
+            <div><strong>Night LNDG:</strong> ${nightLandings}</div>
         `;
     }
 
