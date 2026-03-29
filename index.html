@@ -39,18 +39,9 @@
             overflow-y: auto;
         }
 
-        /* PDF improvements */
         @media print {
-            .table-wrapper { 
-                max-height: none !important; 
-                overflow: visible !important; 
-            }
-            tr { 
-                page-break-inside: avoid !important; 
-            }
-            thead { 
-                display: table-header-group !important; 
-            }
+            .table-wrapper { max-height: none !important; overflow: visible !important; }
+            tr { page-break-inside: avoid !important; }
         }
     </style>
 </head>
@@ -84,39 +75,37 @@
         </div>
     </div>
 
-    <!-- Main Logbook -->
+    <!-- Logbook Content -->
     <div class="px-6 pb-8">
         <div id="logbook-content" class="bg-white rounded-3xl shadow-xl overflow-hidden">
             
             <div class="table-wrapper overflow-x-auto" id="table-wrapper">
                 <table id="logbook-table" class="logbook-table w-full">
                     <thead>
-    <tr>
-        <th class="w-28">DATE</th>
-        <th class="w-40">AIRCRAFT TYPE</th>
-        <th class="w-24">REG</th>
-        <th class="w-20">FROM</th>
-        <th class="w-20">TO</th>
-        <th colspan="5" class="text-center">SINGLE-ENGINE</th>
-        <th colspan="5" class="text-center">MULTI-ENGINE</th>
-        <th colspan="4" class="text-center">X-COUNTRY</th>
-        <th colspan="4" class="text-center">INSTRUMENT TIME</th>
-        <th class="w-12">NIGHT LNDG</th>
-        <!-- APPS column removed -->
-        <th class="text-left w-56">PIC / CO-PILOT / REMARKS</th>
-        <th class="w-16 no-print">ACTIONS</th>
-    </tr>
-    <tr class="bg-slate-700 text-[10px] text-white">
-        <th></th><th></th><th></th><th></th><th></th>
-        <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
-        <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
-        <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th>
-        <th>IMC</th><th>Hood</th><th>FTD</th><th>IFR</th>
-        <th></th>
-        <!-- APPS removed -->
-        <th></th><th></th>
-    </tr>
-</thead>
+                        <tr>
+                            <th class="w-28">DATE</th>
+                            <th class="w-40">AIRCRAFT TYPE</th>
+                            <th class="w-24">REG</th>
+                            <th class="w-20">FROM</th>
+                            <th class="w-20">TO</th>
+                            <th colspan="5" class="text-center">SINGLE-ENGINE</th>
+                            <th colspan="5" class="text-center">MULTI-ENGINE</th>
+                            <th colspan="4" class="text-center">X-COUNTRY</th>
+                            <th colspan="4" class="text-center">INSTRUMENT TIME</th>
+                            <th class="w-12">NIGHT LNDG</th>
+                            <th class="text-left w-56">PIC / CO-PILOT / REMARKS</th>
+                            <th class="w-16 no-print">ACTIONS</th>
+                        </tr>
+                        <tr class="bg-slate-700 text-[10px] text-white">
+                            <th></th><th></th><th></th><th></th><th></th>
+                            <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
+                            <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
+                            <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th>
+                            <th>IMC</th><th>Hood</th><th>FTD</th><th>IFR</th>
+                            <th></th>
+                            <th></th><th></th>
+                        </tr>
+                    </thead>
                     <tbody id="logbook-body"></tbody>
                     <tfoot id="logbook-tfoot" class="bg-slate-100 border-t-4 border-[#0a2540] font-semibold text-[#0a2540]"></tfoot>
                 </table>
@@ -146,7 +135,7 @@
     </div>
 </div>
 
-<!-- Modal (full form) -->
+<!-- Modal -->
 <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto">
         <div class="px-8 py-6 border-b sticky top-0 bg-white z-10 flex justify-between">
@@ -155,9 +144,114 @@
         </div>
         
         <form id="flight-form" onsubmit="handleFormSubmit(event)" class="p-8 grid grid-cols-12 gap-6">
-            <!-- Your full form fields go here - same as previous working version -->
-            <!-- Date, Aircraft, Reg, From/To, PIC/Co-Pilot, SE/ME/XC/Instrument with FTD, Night Landings, Apps, Remarks -->
-            <!-- (The script expects the same input IDs as before) -->
+            <div class="col-span-12 md:col-span-4">
+                <label class="block text-xs font-medium text-slate-500 mb-1">DATE (e.g. 2023.aug.22)</label>
+                <input type="text" id="form-date" placeholder="2023.aug.22" required class="w-full border border-slate-300 rounded-2xl px-5 py-4 font-medium">
+            </div>
+            <div class="col-span-12 md:col-span-4">
+                <label class="block text-xs font-medium text-slate-500 mb-1">AIRCRAFT TYPE</label>
+                <input type="text" id="form-type" placeholder="Cessna 172" required class="w-full border border-slate-300 rounded-2xl px-5 py-4">
+            </div>
+            <div class="col-span-12 md:col-span-3">
+                <label class="block text-xs font-medium text-slate-500 mb-1">REG</label>
+                <input type="text" id="form-reg" placeholder="C-GABC" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
+            </div>
+
+            <div class="col-span-6 md:col-span-2">
+                <label class="block text-xs font-medium text-slate-500 mb-1">FROM</label>
+                <input type="text" id="form-from" placeholder="CYVR" maxlength="4" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
+            </div>
+            <div class="col-span-6 md:col-span-2">
+                <label class="block text-xs font-medium text-slate-500 mb-1">TO</label>
+                <input type="text" id="form-to" placeholder="CYLW" maxlength="4" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
+            </div>
+
+            <div class="col-span-12 md:col-span-2">
+                <label class="block text-xs font-medium text-slate-500 mb-1">TOTAL TIME</label>
+                <input type="number" id="form-total" step="0.1" value="1.0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center text-xl font-semibold">
+            </div>
+
+            <div class="col-span-12 md:col-span-6">
+                <label class="block text-xs font-medium text-slate-500 mb-1">PIC NAME</label>
+                <input type="text" id="form-pic-name" placeholder="Alan Gilels" class="w-full border border-slate-300 rounded-2xl px-5 py-4">
+            </div>
+            <div class="col-span-12 md:col-span-6">
+                <label class="block text-xs font-medium text-slate-500 mb-1">CO-PILOT NAME</label>
+                <input type="text" id="form-copilot-name" class="w-full border border-slate-300 rounded-2xl px-5 py-4">
+            </div>
+
+            <!-- Single-Engine -->
+            <div class="col-span-12 mt-6">
+                <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">SINGLE-ENGINE</div>
+                <div class="grid grid-cols-5 gap-4">
+                    <div><label class="block text-xs text-slate-500 mb-1">Day PIC</label><input type="number" id="form-se-day-pic" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Day Dual</label><input type="number" id="form-se-day-dual" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Night PIC</label><input type="number" id="form-se-night-pic" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Night Dual</label><input type="number" id="form-se-night-dual" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Co-Pilot</label><input type="number" id="form-se-co" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                </div>
+            </div>
+
+            <!-- Multi-Engine -->
+            <div class="col-span-12">
+                <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">MULTI-ENGINE</div>
+                <div class="grid grid-cols-5 gap-4">
+                    <div><label class="block text-xs text-slate-500 mb-1">Day PIC</label><input type="number" id="form-me-day-pic" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Day Dual</label><input type="number" id="form-me-day-dual" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Night PIC</label><input type="number" id="form-me-night-pic" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Night Dual</label><input type="number" id="form-me-night-dual" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Co-Pilot</label><input type="number" id="form-me-co" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                </div>
+            </div>
+
+            <!-- X-Country -->
+            <div class="col-span-12">
+                <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">X-COUNTRY</div>
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <div class="text-center text-xs font-medium text-slate-500 mb-2">DAY</div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs text-slate-500 mb-1">PIC</label><input type="number" id="form-xc-day-pic" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                            <div><label class="block text-xs text-slate-500 mb-1">Dual</label><input type="number" id="form-xc-day-dual" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-center text-xs font-medium text-slate-500 mb-2">NIGHT</div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs text-slate-500 mb-1">PIC</label><input type="number" id="form-xc-night-pic" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                            <div><label class="block text-xs text-slate-500 mb-1">Dual</label><input type="number" id="form-xc-night-dual" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instrument Time -->
+            <div class="col-span-12">
+                <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">INSTRUMENT TIME</div>
+                <div class="grid grid-cols-4 gap-4">
+                    <div><label class="block text-xs text-slate-500 mb-1">Actual IMC</label><input type="number" id="form-actual-imc" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Hood</label><input type="number" id="form-hood" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">FTD</label><input type="number" id="form-ftd" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">IFR Appr</label><input type="number" id="form-ifr-appr" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                </div>
+            </div>
+
+            <div class="col-span-12 grid grid-cols-1 gap-6">
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 mb-1">NIGHT LANDINGS</label>
+                    <input type="number" id="form-nightland" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4">
+                </div>
+            </div>
+
+            <div class="col-span-12">
+                <label class="block text-xs font-medium text-slate-500 mb-1">REMARKS</label>
+                <textarea id="form-remarks" rows="3" class="w-full border border-slate-300 rounded-3xl px-5 py-4" placeholder="Notes..."></textarea>
+            </div>
+
+            <div class="col-span-12 flex gap-3 pt-8">
+                <button type="button" onclick="hideModal()" class="flex-1 py-5 border border-slate-300 rounded-3xl hover:bg-slate-100">CANCEL</button>
+                <button type="submit" id="save-btn" class="flex-1 py-5 bg-[#0a2540] text-white rounded-3xl hover:bg-sky-700">SAVE ENTRY</button>
+            </div>
         </form>
     </div>
 </div>
@@ -226,6 +320,7 @@
         const tbody = document.getElementById('logbook-body');
         tbody.innerHTML = '';
         const sorted = sortFlightsByDate();
+
         sorted.forEach(f => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -253,7 +348,6 @@
                 <td>${parseFloat(f.ftd||0).toFixed(1)}</td>
                 <td>${parseFloat(f.ifrAppr||0).toFixed(1)}</td>
                 <td>${parseInt(f.nightLandings||0)}</td>
-                <td>${parseInt(f.instrumentApproaches||0)}</td>
                 <td class="text-left text-xs">${f.picName ? '<strong>PIC:</strong> ' + f.picName : ''}${f.copilotName ? '<br><strong>Co:</strong> ' + f.copilotName : ''}<br>${f.remarks || ''}</td>
                 <td class="no-print">
                     <button onclick="editFlight('${f.id}')" class="text-sky-600 hover:text-sky-800 px-2 py-1 text-lg">✏️</button>
@@ -306,30 +400,30 @@
         `;
 
         document.getElementById('logbook-tfoot').innerHTML = `
-    <tr class="bg-slate-100 font-semibold border-t-4 border-[#0a2540]">
-        <td colspan="5" class="text-left pl-8">TOTALS →</td>
-        <td>${seDayPic.toFixed(1)}</td>
-        <td>${seDayDual.toFixed(1)}</td>
-        <td>0.0</td>
-        <td>0.0</td>
-        <td>0.0</td>
-        <td>${meDayPic.toFixed(1)}</td>
-        <td>${meDayDual.toFixed(1)}</td>
-        <td>0.0</td>
-        <td>0.0</td>
-        <td>0.0</td>
-        <td>${xcDayPic.toFixed(1)}</td>
-        <td>0.0</td>
-        <td>0.0</td>
-        <td>0.0</td>
-        <td>${actualIMC.toFixed(1)}</td>
-        <td>${hood.toFixed(1)}</td>
-        <td>${ftd.toFixed(1)}</td>
-        <td>0.0</td>
-        <td>0</td>
-        <td></td>
-        <td class="no-print"></td>
-    </tr>`;
+            <tr class="bg-slate-100 font-semibold border-t-4 border-[#0a2540]">
+                <td colspan="5" class="text-left pl-8">TOTALS →</td>
+                <td>${seDayPic.toFixed(1)}</td>
+                <td>${seDayDual.toFixed(1)}</td>
+                <td>0.0</td>
+                <td>0.0</td>
+                <td>0.0</td>
+                <td>${meDayPic.toFixed(1)}</td>
+                <td>${meDayDual.toFixed(1)}</td>
+                <td>0.0</td>
+                <td>0.0</td>
+                <td>0.0</td>
+                <td>${xcDayPic.toFixed(1)}</td>
+                <td>0.0</td>
+                <td>0.0</td>
+                <td>0.0</td>
+                <td>${actualIMC.toFixed(1)}</td>
+                <td>${hood.toFixed(1)}</td>
+                <td>${ftd.toFixed(1)}</td>
+                <td>0.0</td>
+                <td>0</td>
+                <td></td>
+                <td class="no-print"></td>
+            </tr>`;
     }
 
     function updateAllTotals() {
@@ -386,7 +480,6 @@
         document.getElementById('form-ifr-appr').value = flight.ifrAppr || 0;
 
         document.getElementById('form-nightland').value = flight.nightLandings || 0;
-        document.getElementById('form-apps').value = flight.instrumentApproaches || 0;
         document.getElementById('form-remarks').value = flight.remarks || '';
 
         document.getElementById('modal').classList.remove('hidden');
@@ -444,7 +537,6 @@
             ifrAppr: parseFloat(document.getElementById('form-ifr-appr').value) || 0,
 
             nightLandings: parseInt(document.getElementById('form-nightland').value) || 0,
-            instrumentApproaches: parseInt(document.getElementById('form-apps').value) || 0,
             remarks: document.getElementById('form-remarks').value.trim()
         };
 
@@ -470,50 +562,43 @@
     }
 
     function exportToPDF() {
-    const element = document.getElementById('logbook-content');
-    const wrapper = document.getElementById('table-wrapper');
-    const originalMaxHeight = wrapper.style.maxHeight || 'none';
+        const element = document.getElementById('logbook-content');
+        const wrapper = document.getElementById('table-wrapper');
+        const originalMaxHeight = wrapper.style.maxHeight || 'none';
 
-    // Force full content rendering
-    wrapper.style.maxHeight = 'none';
-    element.style.height = 'auto';
+        wrapper.style.maxHeight = 'none';
+        element.style.height = 'auto';
 
-    const opt = {
-        margin: [0.35, 0.25, 0.45, 0.25],        // Balanced margins
-        filename: `Canadian_Pilot_Logbook_${new Date().toISOString().slice(0,10)}.pdf`,
-        image: { type: 'jpeg', quality: 0.90 },
-        html2canvas: { 
-            scale: 1.45,                         // Good balance between height and width
-            useCORS: true,
-            letterRendering: true,
-            scrollY: 0,
-            scrollX: 0,
-            height: element.scrollHeight + 700,
-            width: element.scrollWidth + 100,    // Extra width buffer to prevent right-side cut-off
-            logging: false
-        },
-        jsPDF: { 
-            unit: 'in', 
-            format: 'a3', 
-            orientation: 'landscape' 
-        },
-        pagebreak: { 
-            mode: ['css', 'legacy'],
-            avoid: ['tr', '.bg-slate-50']
-        }
-    };
+        const opt = {
+            margin: [0.35, 0.25, 0.45, 0.25],
+            filename: `Canadian_Pilot_Logbook_${new Date().toISOString().slice(0,10)}.pdf`,
+            image: { type: 'jpeg', quality: 0.92 },
+            html2canvas: { 
+                scale: 1.5,
+                useCORS: true,
+                letterRendering: true,
+                scrollY: 0,
+                height: element.scrollHeight + 700
+            },
+            jsPDF: { 
+                unit: 'in', 
+                format: 'a3', 
+                orientation: 'landscape' 
+            },
+            pagebreak: { mode: ['css', 'legacy'] }
+        };
 
-    html2pdf().set(opt).from(element).save().then(() => {
-        wrapper.style.maxHeight = originalMaxHeight;
-        element.style.height = '';
-        showToast(`PDF exported (${flights.length} flights)`);
-    }).catch(err => {
-        console.error("PDF Error:", err);
-        wrapper.style.maxHeight = originalMaxHeight;
-        element.style.height = '';
-        showToast("PDF export failed", "error");
-    });
-}
+        html2pdf().set(opt).from(element).save().then(() => {
+            wrapper.style.maxHeight = originalMaxHeight;
+            element.style.height = '';
+            showToast(`PDF exported (${flights.length} flights)`);
+        }).catch(err => {
+            console.error(err);
+            wrapper.style.maxHeight = originalMaxHeight;
+            element.style.height = '';
+            showToast("PDF export failed", "error");
+        });
+    }
 
     window.onload = () => {
         loadFromFirebase();
