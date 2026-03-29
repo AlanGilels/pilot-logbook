@@ -414,7 +414,7 @@
         document.getElementById('xc-total').textContent = xcTotal.toFixed(1);
         document.getElementById('inst-total').textContent = instTotal.toFixed(1);
 
-        // COLUMN TOTALS SUMMARY with FTD added
+        // COLUMN TOTALS SUMMARY with FTD
         document.getElementById('totals-grid').innerHTML = `
             <div>SE Day PIC: <span class="font-semibold">${seDayPic.toFixed(1)}</span></div>
             <div>SE Day Dual: <span class="font-semibold">${seDayDual.toFixed(1)}</span></div>
@@ -426,7 +426,7 @@
             <div>FTD: <span class="font-semibold">${ftd.toFixed(1)}</span></div>
         `;
 
-        // Keep your original tfoot TOTALS row
+        // Bottom TOTALS row inside table (kept as in your original)
         document.getElementById('logbook-tfoot').innerHTML = `
             <tr class="bg-slate-100 font-semibold border-t-4 border-[#0a2540]">
                 <td colspan="5" class="text-left pl-8">TOTALS →</td>
@@ -632,7 +632,6 @@
 
     window.onload = () => {
         loadFromFirebase();
-        console.log('%c✅ FTD added to COLUMN TOTALS SUMMARY', 'color:#0a2540; font-weight:600');
     };
 </script>
 </body>
