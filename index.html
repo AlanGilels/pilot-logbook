@@ -469,43 +469,49 @@
     }
 
     function exportToPDF() {
-        const element = document.getElementById('logbook-content');
-        const wrapper = document.getElementById('table-wrapper');
-        const originalMaxHeight = wrapper.style.maxHeight;
+    const element = document.getElementById('logbook-content');
+    const wrapper = document.getElementById('table-wrapper');
+    const originalMaxHeight = wrapper.style.maxHeight || 'none';
 
-        // Force full height for PDF
-        wrapper.style.maxHeight = 'none';
+    // Force full content rendering and remove any height restrictions
+    wrapper.style.maxHeight = 'none';
+    element.style.height = 'auto';
 
-        const opt = {
-            margin: [0.35, 0.25, 0.35, 0.25],
-            filename: `Canadian_Pilot_Logbook_${new Date().toISOString().slice(0,10)}.pdf`,
-            image: { type: 'jpeg', quality: 0.92 },
-            html2canvas: { 
-                scale: 1.5,                 // Balanced for tall tables
-                useCORS: true,
-                letterRendering: true,
-                scrollY: 0,
-                height: element.scrollHeight + 400
-            },
-            jsPDF: { 
-                unit: 'in', 
-                format: 'a3', 
-                orientation: 'landscape' 
-            },
-            pagebreak: { 
-                mode: ['css', 'legacy', 'avoid-all']
-            }
-        };
+    const opt = {
+        margin: [0.3, 0.2, 0.4, 0.2],           // Slightly more bottom margin
+        filename: `Canadian_Pilot_Logbook_${new Date().toISOString().slice(0,10)}.pdf`,
+        image: { type: 'jpeg', quality: 0.90 },
+        html2canvas: { 
+            scale: 1.4,                         // Lower scale = better for very tall tables
+            useCORS: true,
+            letterRendering: true,
+            scrollY: 0,
+            height: element.scrollHeight + 600, // Extra buffer to ensure totals are captured
+            width: element.scrollWidth
+        },
+        jsPDF: { 
+            unit: 'in', 
+            format: 'a3', 
+            orientation: 'landscape' 
+        },
+        pagebreak: { 
+            mode: ['css', 'legacy'],            // Let CSS control page breaks better
+            avoid: ['tr', '.avoid-break'],
+            after: ['.page-break']
+        }
+    };
 
-        html2pdf().set(opt).from(element).save().then(() => {
-            wrapper.style.maxHeight = originalMaxHeight;
-            showToast(`PDF exported (${flights.length} flights - multiple pages if needed)`);
-        }).catch(err => {
-            console.error(err);
-            wrapper.style.maxHeight = originalMaxHeight;
-            showToast("PDF export failed", "error");
-        });
-    }
+    html2pdf().set(opt).from(element).save().then(() => {
+        wrapper.style.maxHeight = originalMaxHeight;
+        element.style.height = '';
+        showToast(`PDF exported successfully (${flights.length} flights)`);
+    }).catch(err => {
+        console.error("PDF Error:", err);
+        wrapper.style.maxHeight = originalMaxHeight;
+        element.style.height = '';
+        showToast("PDF export failed. Try again.", "error");
+    });
+}
 
     window.onload = () => {
         loadFromFirebase();
