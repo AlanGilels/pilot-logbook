@@ -473,22 +473,23 @@
     const wrapper = document.getElementById('table-wrapper');
     const originalMaxHeight = wrapper.style.maxHeight || 'none';
 
-    // Force full content
+    // Force full content rendering
     wrapper.style.maxHeight = 'none';
     element.style.height = 'auto';
 
     const opt = {
-        margin: [0.4, 0.3, 0.5, 0.3],           // More bottom margin to protect the grand total
+        margin: [0.35, 0.25, 0.45, 0.25],        // Balanced margins
         filename: `Canadian_Pilot_Logbook_${new Date().toISOString().slice(0,10)}.pdf`,
-        image: { type: 'jpeg', quality: 0.92 },
+        image: { type: 'jpeg', quality: 0.90 },
         html2canvas: { 
-            scale: 1.5,
+            scale: 1.45,                         // Good balance between height and width
             useCORS: true,
             letterRendering: true,
             scrollY: 0,
-            height: element.scrollHeight + 800,   // Extra buffer for the big number
-            width: element.scrollWidth,
-            ignoreElements: (el) => el.classList.contains('no-print')
+            scrollX: 0,
+            height: element.scrollHeight + 700,
+            width: element.scrollWidth + 100,    // Extra width buffer to prevent right-side cut-off
+            logging: false
         },
         jsPDF: { 
             unit: 'in', 
@@ -497,9 +498,21 @@
         },
         pagebreak: { 
             mode: ['css', 'legacy'],
-            avoid: ['tr', '.bg-slate-50']   // Try to keep the totals box together
+            avoid: ['tr', '.bg-slate-50']
         }
     };
+
+    html2pdf().set(opt).from(element).save().then(() => {
+        wrapper.style.maxHeight = originalMaxHeight;
+        element.style.height = '';
+        showToast(`PDF exported (${flights.length} flights)`);
+    }).catch(err => {
+        console.error("PDF Error:", err);
+        wrapper.style.maxHeight = originalMaxHeight;
+        element.style.height = '';
+        showToast("PDF export failed", "error");
+    });
+}
 
     html2pdf().set(opt).from(element).save().then(() => {
         wrapper.style.maxHeight = originalMaxHeight;
