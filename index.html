@@ -113,9 +113,9 @@
             </div>
 
             <!-- COLUMN TOTALS SUMMARY - ALL COLUMNS -->
-            <div class="bg-slate-50 border-t-2 border-[#0a2540] px-8 py-6">
+            <div class="bg-slate-50 border-t-2 border-[#0a2540] px-8 py-8">
                 <div class="text-[#0a2540] font-medium mb-4 text-lg">COLUMN TOTALS SUMMARY</div>
-                <div id="totals-grid" class="grid grid-cols-4 md:grid-cols-6 gap-4 text-sm"></div>
+                <div id="totals-grid" class="grid grid-cols-4 md:grid-cols-6 gap-x-8 gap-y-4 text-sm"></div>
             </div>
         </div>
     </div>
@@ -130,7 +130,6 @@
         </div>
         
         <form id="flight-form" onsubmit="handleFormSubmit(event)" class="p-8 grid grid-cols-12 gap-6">
-            <!-- Basic fields -->
             <div class="col-span-12 md:col-span-4">
                 <label class="block text-xs font-medium text-slate-500 mb-1">DATE (e.g. 2023.aug.22)</label>
                 <input type="text" id="form-date" placeholder="2023.aug.22" required class="w-full border border-slate-300 rounded-2xl px-5 py-4 font-medium">
@@ -369,70 +368,67 @@
     }
 
     function buildTotalsFooter() {
-        let totals = {
-            seDayPic: 0, seDayDual: 0, seNightPic: 0, seNightDual: 0, seCo: 0,
-            meDayPic: 0, meDayDual: 0, meNightPic: 0, meNightDual: 0, meCo: 0,
-            xcDayPic: 0, xcDayDual: 0, xcNightPic: 0, xcNightDual: 0,
-            actualIMC: 0, hood: 0, ftd: 0, ifrAppr: 0,
-            nightLandings: 0
-        };
+        let seDayPic = 0, seDayDual = 0, seNightPic = 0, seNightDual = 0, seCo = 0;
+        let meDayPic = 0, meDayDual = 0, meNightPic = 0, meNightDual = 0, meCo = 0;
+        let xcDayPic = 0, xcDayDual = 0, xcNightPic = 0, xcNightDual = 0;
+        let actualIMC = 0, hood = 0, ftd = 0, ifrAppr = 0;
+        let nightLandings = 0;
 
         flights.forEach(f => {
-            totals.seDayPic += parseFloat(f.seDayPic || 0);
-            totals.seDayDual += parseFloat(f.seDayDual || 0);
-            totals.seNightPic += parseFloat(f.seNightPic || 0);
-            totals.seNightDual += parseFloat(f.seNightDual || 0);
-            totals.seCo += parseFloat(f.seCo || 0);
+            seDayPic += parseFloat(f.seDayPic || 0);
+            seDayDual += parseFloat(f.seDayDual || 0);
+            seNightPic += parseFloat(f.seNightPic || 0);
+            seNightDual += parseFloat(f.seNightDual || 0);
+            seCo += parseFloat(f.seCo || 0);
 
-            totals.meDayPic += parseFloat(f.meDayPic || 0);
-            totals.meDayDual += parseFloat(f.meDayDual || 0);
-            totals.meNightPic += parseFloat(f.meNightPic || 0);
-            totals.meNightDual += parseFloat(f.meNightDual || 0);
-            totals.meCo += parseFloat(f.meCo || 0);
+            meDayPic += parseFloat(f.meDayPic || 0);
+            meDayDual += parseFloat(f.meDayDual || 0);
+            meNightPic += parseFloat(f.meNightPic || 0);
+            meNightDual += parseFloat(f.meNightDual || 0);
+            meCo += parseFloat(f.meCo || 0);
 
-            totals.xcDayPic += parseFloat(f.xcDayPic || 0);
-            totals.xcDayDual += parseFloat(f.xcDayDual || 0);
-            totals.xcNightPic += parseFloat(f.xcNightPic || 0);
-            totals.xcNightDual += parseFloat(f.xcNightDual || 0);
+            xcDayPic += parseFloat(f.xcDayPic || 0);
+            xcDayDual += parseFloat(f.xcDayDual || 0);
+            xcNightPic += parseFloat(f.xcNightPic || 0);
+            xcNightDual += parseFloat(f.xcNightDual || 0);
 
-            totals.actualIMC += parseFloat(f.actualIMC || 0);
-            totals.hood += parseFloat(f.hood || 0);
-            totals.ftd += parseFloat(f.ftd || 0);
-            totals.ifrAppr += parseFloat(f.ifrAppr || 0);
+            actualIMC += parseFloat(f.actualIMC || 0);
+            hood += parseFloat(f.hood || 0);
+            ftd += parseFloat(f.ftd || 0);
+            ifrAppr += parseFloat(f.ifrAppr || 0);
 
-            totals.nightLandings += parseInt(f.nightLandings || 0);
+            nightLandings += parseInt(f.nightLandings || 0);
         });
 
-        // Grand Total (SE + ME only)
-        const grandTotal = (totals.seDayPic + totals.seDayDual + totals.seNightPic + totals.seNightDual + totals.seCo +
-                           totals.meDayPic + totals.meDayDual + totals.meNightPic + totals.meNightDual + totals.meCo).toFixed(1);
+        const grandTotal = (seDayPic + seDayDual + seNightPic + seNightDual + seCo +
+                           meDayPic + meDayDual + meNightPic + meNightDual + meCo).toFixed(1);
 
         document.getElementById('grand-total-time').textContent = grandTotal;
 
-        // Full COLUMN TOTALS SUMMARY with all columns
+        // Full COLUMN TOTALS SUMMARY with every column
         document.getElementById('totals-grid').innerHTML = `
-            <div class="col-span-1">SE Day PIC: <span class="font-semibold">${totals.seDayPic.toFixed(1)}</span></div>
-            <div class="col-span-1">SE Day Dual: <span class="font-semibold">${totals.seDayDual.toFixed(1)}</span></div>
-            <div class="col-span-1">SE Night PIC: <span class="font-semibold">${totals.seNightPic.toFixed(1)}</span></div>
-            <div class="col-span-1">SE Night Dual: <span class="font-semibold">${totals.seNightDual.toFixed(1)}</span></div>
-            <div class="col-span-1">SE Co: <span class="font-semibold">${totals.seCo.toFixed(1)}</span></div>
+            <div>SE Day PIC: <span class="font-semibold">${seDayPic.toFixed(1)}</span></div>
+            <div>SE Day Dual: <span class="font-semibold">${seDayDual.toFixed(1)}</span></div>
+            <div>SE Night PIC: <span class="font-semibold">${seNightPic.toFixed(1)}</span></div>
+            <div>SE Night Dual: <span class="font-semibold">${seNightDual.toFixed(1)}</span></div>
+            <div>SE Co: <span class="font-semibold">${seCo.toFixed(1)}</span></div>
 
-            <div class="col-span-1">ME Day PIC: <span class="font-semibold">${totals.meDayPic.toFixed(1)}</span></div>
-            <div class="col-span-1">ME Day Dual: <span class="font-semibold">${totals.meDayDual.toFixed(1)}</span></div>
-            <div class="col-span-1">ME Night PIC: <span class="font-semibold">${totals.meNightPic.toFixed(1)}</span></div>
-            <div class="col-span-1">ME Night Dual: <span class="font-semibold">${totals.meNightDual.toFixed(1)}</span></div>
-            <div class="col-span-1">ME Co: <span class="font-semibold">${totals.meCo.toFixed(1)}</span></div>
+            <div>ME Day PIC: <span class="font-semibold">${meDayPic.toFixed(1)}</span></div>
+            <div>ME Day Dual: <span class="font-semibold">${meDayDual.toFixed(1)}</span></div>
+            <div>ME Night PIC: <span class="font-semibold">${meNightPic.toFixed(1)}</span></div>
+            <div>ME Night Dual: <span class="font-semibold">${meNightDual.toFixed(1)}</span></div>
+            <div>ME Co: <span class="font-semibold">${meCo.toFixed(1)}</span></div>
 
-            <div class="col-span-1">XC Day PIC: <span class="font-semibold">${totals.xcDayPic.toFixed(1)}</span></div>
-            <div class="col-span-1">XC Day Dual: <span class="font-semibold">${totals.xcDayDual.toFixed(1)}</span></div>
-            <div class="col-span-1">XC Night PIC: <span class="font-semibold">${totals.xcNightPic.toFixed(1)}</span></div>
-            <div class="col-span-1">XC Night Dual: <span class="font-semibold">${totals.xcNightDual.toFixed(1)}</span></div>
+            <div>XC Day PIC: <span class="font-semibold">${xcDayPic.toFixed(1)}</span></div>
+            <div>XC Day Dual: <span class="font-semibold">${xcDayDual.toFixed(1)}</span></div>
+            <div>XC Night PIC: <span class="font-semibold">${xcNightPic.toFixed(1)}</span></div>
+            <div>XC Night Dual: <span class="font-semibold">${xcNightDual.toFixed(1)}</span></div>
 
-            <div class="col-span-1">Actual IMC: <span class="font-semibold">${totals.actualIMC.toFixed(1)}</span></div>
-            <div class="col-span-1">Hood: <span class="font-semibold">${totals.hood.toFixed(1)}</span></div>
-            <div class="col-span-1">FTD: <span class="font-semibold">${totals.ftd.toFixed(1)}</span></div>
-            <div class="col-span-1">IFR Appr: <span class="font-semibold">${totals.ifrAppr.toFixed(1)}</span></div>
-            <div class="col-span-1">Night LNDG: <span class="font-semibold">${totals.nightLandings}</span></div>
+            <div>Actual IMC: <span class="font-semibold">${actualIMC.toFixed(1)}</span></div>
+            <div>Hood: <span class="font-semibold">${hood.toFixed(1)}</span></div>
+            <div>FTD: <span class="font-semibold">${ftd.toFixed(1)}</span></div>
+            <div>IFR Appr: <span class="font-semibold">${ifrAppr.toFixed(1)}</span></div>
+            <div>Night LNDG: <span class="font-semibold">${nightLandings}</span></div>
         `;
     }
 
@@ -458,7 +454,6 @@
         editId = id;
         document.getElementById('modal-title').textContent = 'Edit Flight';
 
-        // Fill all form fields (same as before)
         document.getElementById('form-date').value = flight.date || '';
         document.getElementById('form-type').value = flight.aircraftType || '';
         document.getElementById('form-reg').value = flight.registration || '';
