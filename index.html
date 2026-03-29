@@ -112,7 +112,7 @@
                 </table>
             </div>
 
-            <!-- COLUMN TOTALS SUMMARY - ALL COLUMNS -->
+            <!-- COLUMN TOTALS SUMMARY -->
             <div class="bg-slate-50 border-t-2 border-[#0a2540] px-8 py-8">
                 <div class="text-[#0a2540] font-medium mb-4 text-lg">COLUMN TOTALS SUMMARY</div>
                 <div id="totals-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm leading-relaxed"></div>
@@ -130,6 +130,7 @@
         </div>
         
         <form id="flight-form" onsubmit="handleFormSubmit(event)" class="p-8 grid grid-cols-12 gap-6">
+            <!-- Form fields (same as before) -->
             <div class="col-span-12 md:col-span-4">
                 <label class="block text-xs font-medium text-slate-500 mb-1">DATE (e.g. 2023.aug.22)</label>
                 <input type="text" id="form-date" placeholder="2023.aug.22" required class="w-full border border-slate-300 rounded-2xl px-5 py-4 font-medium">
@@ -405,7 +406,7 @@
 
         document.getElementById('grand-total-time').textContent = grandTotal;
 
-        // All columns totals
+        // All columns totals - simple and reliable
         document.getElementById('totals-grid').innerHTML = `
             <div><strong>SE Day PIC:</strong> ${seDayPic.toFixed(1)}</div>
             <div><strong>SE Day Dual:</strong> ${seDayDual.toFixed(1)}</div>
