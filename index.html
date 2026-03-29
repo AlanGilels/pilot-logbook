@@ -8,7 +8,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500&display=swap');
@@ -40,13 +39,9 @@
             overflow-y: auto;
         }
 
-        .photo-count {
-            background: #0a2540;
-            color: white;
-            font-size: 0.7rem;
-            padding: 2px 6px;
-            border-radius: 9999px;
-            margin-left: 6px;
+        @media print {
+            .table-wrapper { max-height: none !important; overflow: visible !important; }
+            tr { page-break-inside: avoid !important; }
         }
     </style>
 </head>
@@ -63,7 +58,7 @@
             </div>
         </div>
         <button onclick="exportToPDF()" class="bg-white text-[#0a2540] px-6 py-3 rounded-2xl font-semibold hover:bg-amber-400 transition-colors text-sm">
-            📄 EXPORT PDF
+            📄 EXPORT PDF (A3 - FULL TABLE)
         </button>
     </div>
 
@@ -80,9 +75,10 @@
         </div>
     </div>
 
-    <!-- Main Content -->
+    <!-- Logbook Content -->
     <div class="px-6 pb-8">
         <div id="logbook-content" class="bg-white rounded-3xl shadow-xl overflow-hidden">
+            
             <div class="table-wrapper overflow-x-auto" id="table-wrapper">
                 <table id="logbook-table" class="logbook-table w-full">
                     <thead>
@@ -115,7 +111,7 @@
                 </table>
             </div>
 
-            <!-- COLUMN TOTALS SUMMARY -->
+            <!-- COLUMN TOTALS SUMMARY with FTD -->
             <div class="bg-slate-50 border-t-2 border-[#0a2540] px-8 py-6 grid grid-cols-12 gap-6 text-sm">
                 <div class="col-span-12 md:col-span-5">
                     <div class="text-[#0a2540] font-medium mb-3">COLUMN TOTALS SUMMARY</div>
@@ -240,15 +236,11 @@
                 </div>
             </div>
 
-            <div class="col-span-12">
-                <label class="block text-xs font-medium text-slate-500 mb-1">NIGHT LANDINGS</label>
-                <input type="number" id="form-nightland" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4">
-            </div>
-
-            <div class="col-span-12">
-                <label class="block text-xs font-medium text-slate-500 mb-1">PHOTOS (Proof of location - up to 5)</label>
-                <input type="file" id="form-photos" accept="image/*" multiple class="w-full border border-slate-300 rounded-2xl px-5 py-4">
-                <p class="text-xs text-slate-400 mt-1">Take photos at the location as proof</p>
+            <div class="col-span-12 grid grid-cols-1 gap-6">
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 mb-1">NIGHT LANDINGS</label>
+                    <input type="number" id="form-nightland" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4">
+                </div>
             </div>
 
             <div class="col-span-12">
@@ -261,17 +253,6 @@
                 <button type="submit" id="save-btn" class="flex-1 py-5 bg-[#0a2540] text-white rounded-3xl hover:bg-sky-700">SAVE ENTRY</button>
             </div>
         </form>
-    </div>
-</div>
-
-<!-- Photo Viewer -->
-<div id="photo-viewer" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[60] p-4">
-    <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-auto">
-        <div class="p-6 border-b flex justify-between sticky top-0 bg-white">
-            <h3 class="text-xl font-semibold" id="photo-viewer-title">Flight Photos</h3>
-            <button onclick="closePhotoViewer()" class="text-3xl text-slate-400 hover:text-black">×</button>
-        </div>
-        <div id="photo-grid" class="p-6 grid grid-cols-2 md:grid-cols-3 gap-4"></div>
     </div>
 </div>
 
@@ -288,7 +269,6 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    const storage = firebase.storage();
 
     let flights = [];
     let editId = null;
@@ -342,7 +322,6 @@
         const sorted = sortFlightsByDate();
 
         sorted.forEach(f => {
-            const photoCount = f.remarksPhotos ? f.remarksPhotos.length : 0;
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td class="font-medium">${f.date || ''}</td>
@@ -369,12 +348,7 @@
                 <td>${parseFloat(f.ftd||0).toFixed(1)}</td>
                 <td>${parseFloat(f.ifrAppr||0).toFixed(1)}</td>
                 <td>${parseInt(f.nightLandings||0)}</td>
-                <td class="text-left text-xs">
-                    ${f.picName ? '<strong>PIC:</strong> ' + f.picName : ''}
-                    ${f.copilotName ? '<br><strong>Co:</strong> ' + f.copilotName : ''}
-                    <br>${f.remarks || ''}
-                    ${photoCount > 0 ? `<button onclick="showPhotos('${f.id}')" class="photo-count">📸 ${photoCount}</button>` : ''}
-                </td>
+                <td class="text-left text-xs">${f.picName ? '<strong>PIC:</strong> ' + f.picName : ''}${f.copilotName ? '<br><strong>Co:</strong> ' + f.copilotName : ''}<br>${f.remarks || ''}</td>
                 <td class="no-print">
                     <button onclick="editFlight('${f.id}')" class="text-sky-600 hover:text-sky-800 px-2 py-1 text-lg">✏️</button>
                     <button onclick="deleteFlight('${f.id}')" class="text-red-600 hover:text-red-800 px-2 py-1 text-lg ml-2">🗑</button>
@@ -530,26 +504,6 @@
         saveBtn.textContent = "SAVING...";
         saveBtn.disabled = true;
 
-        const photoFiles = document.getElementById('form-photos').files;
-        let photoURLs = [];
-
-        if (photoFiles.length > 0) {
-            for (let file of photoFiles) {
-                if (file.size > 5 * 1024 * 1024) {
-                    alert("One photo is too large (max 5MB)");
-                    continue;
-                }
-                const storageRef = storage.ref(`logbook_photos/${Date.now()}_${file.name}`);
-                try {
-                    await storageRef.put(file);
-                    const url = await storageRef.getDownloadURL();
-                    photoURLs.push(url);
-                } catch (err) {
-                    console.error("Photo upload failed", err);
-                }
-            }
-        }
-
         const flightData = {
             date: document.getElementById('form-date').value.trim(),
             aircraftType: document.getElementById('form-type').value.trim(),
@@ -583,8 +537,7 @@
             ifrAppr: parseFloat(document.getElementById('form-ifr-appr').value) || 0,
 
             nightLandings: parseInt(document.getElementById('form-nightland').value) || 0,
-            remarks: document.getElementById('form-remarks').value.trim(),
-            remarksPhotos: photoURLs
+            remarks: document.getElementById('form-remarks').value.trim()
         };
 
         try {
@@ -606,30 +559,6 @@
             saveBtn.textContent = originalText;
             saveBtn.disabled = false;
         }
-    }
-
-    function showPhotos(flightId) {
-        const flight = flights.find(f => f.id === flightId);
-        if (!flight || !flight.remarksPhotos || flight.remarksPhotos.length === 0) {
-            alert("No photos for this flight");
-            return;
-        }
-
-        const grid = document.getElementById('photo-grid');
-        grid.innerHTML = '';
-
-        flight.remarksPhotos.forEach(url => {
-            const div = document.createElement('div');
-            div.innerHTML = `<img src="${url}" class="w-full rounded-xl shadow cursor-pointer" onclick="window.open('${url}', '_blank')">`;
-            grid.appendChild(div);
-        });
-
-        document.getElementById('photo-viewer-title').textContent = `Photos for ${flight.date || ''} - ${flight.aircraftType || ''}`;
-        document.getElementById('photo-viewer').classList.remove('hidden');
-    }
-
-    function closePhotoViewer() {
-        document.getElementById('photo-viewer').classList.add('hidden');
     }
 
     function exportToPDF() {
