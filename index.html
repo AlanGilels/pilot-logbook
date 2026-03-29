@@ -43,11 +43,6 @@
             .table-wrapper { max-height: none !important; overflow: visible !important; }
             tr { page-break-inside: avoid; }
         }
-
-        .toast {
-            animation: toastPop 0.3s ease forwards;
-        }
-        @keyframes toastPop { 0% { transform: translateY(30px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
     </style>
 
     <link rel="manifest" href="manifest.json">
@@ -118,7 +113,7 @@
                 </table>
             </div>
 
-            <!-- COLUMN TOTALS SUMMARY (with FTD added) -->
+            <!-- COLUMN TOTALS SUMMARY with FTD -->
             <div class="bg-slate-50 border-t-2 border-[#0a2540] px-8 py-6 grid grid-cols-12 gap-6 text-sm">
                 <div class="col-span-12 md:col-span-5">
                     <div class="text-[#0a2540] font-medium mb-3">COLUMN TOTALS SUMMARY</div>
@@ -258,8 +253,6 @@
                 <label class="block text-xs font-medium text-slate-500 mb-1">REMARKS</label>
                 <textarea id="form-remarks" rows="3" class="w-full border border-slate-300 rounded-3xl px-5 py-4" placeholder="Notes..."></textarea>
             </div>
-
-            <input type="hidden" id="form-edit-id">
 
             <div class="col-span-12 flex gap-3 pt-8">
                 <button type="button" onclick="hideModal()" class="flex-1 py-5 border border-slate-300 rounded-3xl hover:bg-slate-100">CANCEL</button>
@@ -426,7 +419,7 @@
             <div>FTD: <span class="font-semibold">${ftd.toFixed(1)}</span></div>
         `;
 
-        // Bottom TOTALS row inside table (kept as in your original)
+        // Bottom TOTALS row inside table
         document.getElementById('logbook-tfoot').innerHTML = `
             <tr class="bg-slate-100 font-semibold border-t-4 border-[#0a2540]">
                 <td colspan="5" class="text-left pl-8">TOTALS →</td>
@@ -622,7 +615,7 @@
 
         html2pdf().set(opt).from(element).save().then(() => {
             wrapper.style.maxHeight = originalMaxHeight;
-            showToast("PDF exported with full table (multiple pages if needed)");
+            showToast("PDF exported with full table");
         }).catch(err => {
             console.error(err);
             wrapper.style.maxHeight = originalMaxHeight;
