@@ -570,40 +570,43 @@
     }
 
     function exportToPDF() {
-        const element = document.getElementById('logbook-content');
-        const wrapper = document.getElementById('table-wrapper');
-        const originalMaxHeight = wrapper.style.maxHeight;
+    const element = document.getElementById('logbook-content');
+    const wrapper = document.getElementById('table-wrapper');
+    const originalMaxHeight = wrapper.style.maxHeight || 'none';
 
-        wrapper.style.maxHeight = 'none';
+    // Force full height for PDF
+    wrapper.style.maxHeight = 'none';
 
-        const opt = {
-            margin: [0.4, 0.25, 0.4, 0.25],
-            filename: `Canadian_Pilot_Logbook_${new Date().toISOString().slice(0,10)}.pdf`,
-            image: { type: 'jpeg', quality: 0.92 },
-            html2canvas: { 
-                scale: 1.6,
-                useCORS: true,
-                letterRendering: true,
-                scrollY: 0,
-                height: element.scrollHeight + 300
-            },
-            jsPDF: { 
-                unit: 'in', 
-                format: 'a3', 
-                orientation: 'landscape' 
-            },
-            pagebreak: { mode: ['css', 'legacy'] }
-        };
+    const opt = {
+        margin: [0.35, 0.25, 0.35, 0.25],
+        filename: `Canadian_Pilot_Logbook_${new Date().toISOString().slice(0,10)}.pdf`,
+        image: { type: 'jpeg', quality: 0.92 },
+        html2canvas: { 
+            scale: 1.6,                    // Balanced for 30+ flights
+            useCORS: true,
+            letterRendering: true,
+            scrollY: 0,
+            height: element.scrollHeight + 400
+        },
+        jsPDF: { 
+            unit: 'in', 
+            format: 'a3', 
+            orientation: 'landscape' 
+        },
+        pagebreak: { 
+            mode: ['css', 'legacy', 'avoid-all']
+        }
+    };
 
-        html2pdf().set(opt).from(element).save().then(() => {
-            wrapper.style.maxHeight = originalMaxHeight;
-            showToast("PDF exported with all flights and totals");
-        }).catch(err => {
-            console.error(err);
-            wrapper.style.maxHeight = originalMaxHeight;
-            showToast("PDF export failed", "error");
-        });
-    }
+    html2pdf().set(opt).from(element).save().then(() => {
+        wrapper.style.maxHeight = originalMaxHeight;
+        showToast(`PDF exported (${flights.length} flights - should span multiple pages cleanly)`);
+    }).catch(err => {
+        console.error(err);
+        wrapper.style.maxHeight = originalMaxHeight;
+        showToast("PDF export failed. Try again.", "error");
+    });
+}
 
     window.onload = () => {
         loadFromFirebase();
