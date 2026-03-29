@@ -136,7 +136,7 @@
     </div>
 </div>
 
-<!-- Modal with Photo Upload -->
+<!-- Modal -->
 <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto">
         <div class="px-8 py-6 border-b sticky top-0 bg-white z-10 flex justify-between">
@@ -193,7 +193,49 @@
                 </div>
             </div>
 
-            <!-- Multi-Engine, X-Country, Instrument Time sections remain the same as before -->
+            <!-- Multi-Engine -->
+            <div class="col-span-12">
+                <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">MULTI-ENGINE</div>
+                <div class="grid grid-cols-5 gap-4">
+                    <div><label class="block text-xs text-slate-500 mb-1">Day PIC</label><input type="number" id="form-me-day-pic" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Day Dual</label><input type="number" id="form-me-day-dual" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Night PIC</label><input type="number" id="form-me-night-pic" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Night Dual</label><input type="number" id="form-me-night-dual" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Co-Pilot</label><input type="number" id="form-me-co" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                </div>
+            </div>
+
+            <!-- X-Country -->
+            <div class="col-span-12">
+                <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">X-COUNTRY</div>
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <div class="text-center text-xs font-medium text-slate-500 mb-2">DAY</div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs text-slate-500 mb-1">PIC</label><input type="number" id="form-xc-day-pic" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                            <div><label class="block text-xs text-slate-500 mb-1">Dual</label><input type="number" id="form-xc-day-dual" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-center text-xs font-medium text-slate-500 mb-2">NIGHT</div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs text-slate-500 mb-1">PIC</label><input type="number" id="form-xc-night-pic" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                            <div><label class="block text-xs text-slate-500 mb-1">Dual</label><input type="number" id="form-xc-night-dual" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instrument Time -->
+            <div class="col-span-12">
+                <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">INSTRUMENT TIME</div>
+                <div class="grid grid-cols-4 gap-4">
+                    <div><label class="block text-xs text-slate-500 mb-1">Actual IMC</label><input type="number" id="form-actual-imc" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Hood</label><input type="number" id="form-hood" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">FTD</label><input type="number" id="form-ftd" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">IFR Appr</label><input type="number" id="form-ifr-appr" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                </div>
+            </div>
 
             <div class="col-span-12">
                 <label class="block text-xs font-medium text-slate-500 mb-1">NIGHT LANDINGS</label>
@@ -471,7 +513,7 @@
         e.preventDefault();
         const saveBtn = document.getElementById('save-btn');
         const originalText = saveBtn.textContent;
-        saveBtn.textContent = "UPLOADING PHOTOS & SAVING...";
+        saveBtn.textContent = "SAVING...";
         saveBtn.disabled = true;
 
         const photoFiles = document.getElementById('form-photos').files;
@@ -480,7 +522,7 @@
         if (photoFiles.length > 0) {
             for (let file of photoFiles) {
                 if (file.size > 5 * 1024 * 1024) {
-                    alert("One photo is too large (max 5MB each)");
+                    alert("One photo is too large (max 5MB)");
                     continue;
                 }
                 const storageRef = storage.ref(`logbook_photos/${Date.now()}_${file.name}`);
