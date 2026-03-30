@@ -59,7 +59,8 @@
                 <span class="text-2xl">+</span> ADD NEW FLIGHT
             </button>
             <div class="flex items-center gap-x-4">
-                <button onclick="downloadLocalFile()" class="px-6 py-3 border border-slate-300 rounded-3xl text-sm hover:bg-slate-50">💾 Download JSON</button>
+                <button onclick="loadJsonFile()" class="px-6 py-3 border border-blue-500 text-blue-600 rounded-3xl text-sm hover:bg-blue-50">📂 Load Corrected JSON from Desktop</button>
+                <button onclick="downloadLocalFile()" class="px-6 py-3 border border-slate-300 rounded-3xl text-sm hover:bg-slate-50">💾 Download Current JSON</button>
                 <button onclick="forceFullSync()" class="px-6 py-3 bg-emerald-600 text-white rounded-3xl text-sm hover:bg-emerald-700">🔄 FORCE FULL SYNC</button>
             </div>
             <div class="text-sm text-slate-500">
@@ -67,7 +68,7 @@
             </div>
         </div>
 
-        <!-- Second copied header (exactly as you liked) -->
+        <!-- Second copied header (98% width) -->
         <div class="copied-header-container overflow-x-auto">
             <table class="logbook-table w-full">
                 <thead>
@@ -283,58 +284,61 @@
     let flights = [];
     let editId = null;
 
-    async function loadData() {
-        flights = [];
-
-        const localData = localStorage.getItem('canadianPilotLogbook');
-        if (localData) {
-            flights = JSON.parse(localData);
-        }
-
-        try {
-            const snapshot = await db.collection('flights').get();
-            const cloudFlights = [];
-            snapshot.forEach(doc => cloudFlights.push(doc.data()));
-
-            const existingIds = new Set(flights.map(f => f.id));
-
-            cloudFlights.forEach(cf => {
-                if (cf && cf.id && !existingIds.has(cf.id)) {
-                    flights.push(cf);
+    // Load Corrected JSON from Desktop
+    function loadJsonFile() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = event => {
+                try {
+                    const loaded = JSON.parse(event.target.result);
+                    flights = Array.isArray(loaded) ? loaded : [];
+                    localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
+                    // Upload to Firebase
+                    flights.forEach(f => {
+                        if (f && f.id) db.collection('flights').doc(f.id).set(f).catch(() => {});
+                    });
+                    updateAllTotals();
+                    showToast(`✅ Loaded ${flights.length} flights from your JSON file`);
+                } catch (err) {
+                    showToast("❌ Error reading JSON file. Make sure it's a valid array.", "error");
                 }
-            });
-        } catch (e) {
-            console.log("Cloud not reachable");
-        }
-
-        localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
-        updateAllTotals();
+            };
+            reader.readAsText(file);
+        };
+        input.click();
     }
 
-    function saveData() {
-        localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
-
+    function downloadLocalFile() {
         const dataStr = JSON.stringify(flights, null, 2);
         const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
         const link = document.createElement('a');
         link.href = dataUri;
         link.download = 'canadianPilotLogbook.json';
         link.click();
-
-        flights.forEach(f => {
-            if (f.id) db.collection('flights').doc(f.id).set(f).catch(() => {});
-        });
     }
 
     async function forceFullSync() {
-        if (confirm("Force full sync?")) {
-            await loadData();
-            showToast("✅ Sync complete");
+        if (confirm("Force full sync with cloud?")) {
+            try {
+                const snapshot = await db.collection('flights').get();
+                const cloudFlights = [];
+                snapshot.forEach(doc => cloudFlights.push(doc.data()));
+                const existingIds = new Set(flights.map(f => f.id));
+                cloudFlights.forEach(cf => {
+                    if (cf && cf.id && !existingIds.has(cf.id)) flights.push(cf);
+                });
+                localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
+                updateAllTotals();
+                showToast("✅ Cloud synced");
+            } catch (e) {
+                showToast("Cloud not reachable");
+            }
         }
-    }
-
-    function downloadLocalFile() {
-        saveData();
     }
 
     function parseCustomDate(dateStr) {
@@ -590,7 +594,13 @@
     }
 
     window.onload = () => {
-        loadData();
+        const localData = localStorage.getItem('canadianPilotLogbook');
+        if (localData) {
+            flights = JSON.parse(localData);
+            updateAllTotals();
+        } else {
+            loadData();
+        }
     };
 </script>
 </body>
