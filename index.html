@@ -296,31 +296,45 @@
     let flights = [];
     let editId = null;
 
-    // Clean load - prevents duplication
+    // SYNCHRONIZE LOCAL + CLOUD (exactly as you asked)
     async function loadData() {
-        flights = [];   // Clear first to avoid doubling
+        flights = [];   // Clear first
 
-        // Try Firebase first (best for iPad)
+        // 1. Load from local computer
+        const localData = localStorage.getItem('canadianPilotLogbook');
+        let localFlights = localData ? JSON.parse(localData) : [];
+
+        // 2. Load from cloud
+        let cloudFlights = [];
         try {
             const snapshot = await db.collection('flights').get();
-            if (!snapshot.empty) {
-                snapshot.forEach(doc => {
-                    flights.push(doc.data());
-                });
-                // Save to localStorage for offline use
-                localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
-            }
+            snapshot.forEach(doc => {
+                cloudFlights.push(doc.data());
+            });
         } catch (e) {
-            console.log("Firebase not available");
+            console.log("Offline - using local only");
         }
 
-        // If Firebase was empty, load from localStorage
-        if (flights.length === 0) {
-            const saved = localStorage.getItem('canadianPilotLogbook');
-            if (saved) {
-                flights = JSON.parse(saved);
+        // 3. Merge: make sure both sources accomplish each other (union by ID)
+        const mergedMap = new Map();
+
+        // Add all local flights
+        localFlights.forEach(f => {
+            mergedMap.set(f.id, f);
+        });
+
+        // Add any cloud flights that are missing locally
+        cloudFlights.forEach(f => {
+            if (!mergedMap.has(f.id)) {
+                mergedMap.set(f.id, f);
             }
-        }
+        });
+
+        // Convert back to array
+        flights = Array.from(mergedMap.values());
+
+        // Save merged result back to localStorage
+        localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
 
         updateAllTotals();
     }
@@ -328,7 +342,7 @@
     function saveData() {
         localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
 
-        // Auto download JSON
+        // Auto-download JSON to computer
         const dataStr = JSON.stringify(flights, null, 2);
         const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
         const link = document.createElement('a');
@@ -352,12 +366,13 @@
     }
 
     async function forceSyncFromFirebase() {
-        if (confirm("Sync latest data from cloud?")) {
+        if (confirm("Force sync from cloud? This will merge with your local data.")) {
             await loadData();
             showToast("Synced from cloud");
         }
     }
 
+    // ==================== All other functions (unchanged) ====================
     function parseCustomDate(dateStr) {
         if (!dateStr) return new Date(0);
         let cleaned = dateStr.toLowerCase().replace(/\.+/g, '.').trim();
