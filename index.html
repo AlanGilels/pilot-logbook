@@ -119,67 +119,57 @@
     }
 
     async function loadFromFirebase() {
-    try {
-        const snapshot = await db.collection("flights").get();
-        flights = [];
-        snapshot.forEach(doc => {
-            flights.push({ id: doc.id, ...doc.data() });
-        });
-        document.getElementById('sync-status').innerHTML = `<span class="inline-block w-2 h-2 bg-emerald-500 rounded-full"></span> Synced`;
-        
-        console.log("✅ Data loaded, calling updateAllTotals");
-        updateAllTotals();
-    } catch (e) {
-        console.error(e);
-        document.getElementById('sync-status').innerHTML = `<span class="inline-block w-2 h-2 bg-red-500 rounded-full"></span> Offline`;
+        try {
+            console.log("🔄 Trying to load from Firestore...");
+            const snapshot = await db.collection("flights").get();
+            flights = [];
+            snapshot.forEach(doc => {
+                flights.push({ id: doc.id, ...doc.data() });
+            });
+            console.log("✅ Loaded", flights.length, "flights");
+            document.getElementById('sync-status').innerHTML = `<span class="inline-block w-2 h-2 bg-emerald-500 rounded-full"></span> Synced`;
+            updateAllTotals();
+            showToast("Data loaded successfully");
+        } catch (e) {
+            console.error("Load failed:", e);
+            document.getElementById('sync-status').innerHTML = `<span class="inline-block w-2 h-2 bg-red-500 rounded-full"></span> Offline`;
+            showToast("Connection failed. Check rules.", "error");
+        }
     }
-}
 
     function buildTotalsFooter() {
-    console.log("🔄 buildTotalsFooter running");
+        console.log("🔄 buildTotalsFooter running with", flights.length, "flights");
 
-    let xcDayDual = 0;
-    flights.forEach(f => {
-        xcDayDual += parseFloat(f.xcDayDual || 0);
-    });
+        let xcDayDual = 0;
+        flights.forEach(f => {
+            xcDayDual += parseFloat(f.xcDayDual || 0);
+        });
 
-    // Update the grid
-    const grid = document.getElementById('totals-grid');
-    if (grid) {
-        grid.innerHTML = `
-            <div style="background:#fef3c7; padding:16px; border:3px solid #f59e0b; border-radius:12px; text-align:center;">
-                <strong>XC Day Dual:</strong><br>
-                <span style="font-size:24px; font-weight:bold;">${xcDayDual.toFixed(1)}</span>
-            </div>
-        `;
-    }
+        // Update the grid
+        const grid = document.getElementById('totals-grid');
+        if (grid) {
+            grid.innerHTML = `
+                <div style="background:#fef3c7; padding:16px; border:3px solid #f59e0b; border-radius:12px; text-align:center;">
+                    <strong>XC Day Dual:</strong><br>
+                    <span style="font-size:24px; font-weight:bold;">${xcDayDual.toFixed(1)}</span>
+                </div>
+            `;
+        }
 
-    // Update debug banner if it exists
-    const banner = document.getElementById('debug-banner');
-    if (banner) {
-        banner.style.background = '#ecfdf5';
-        banner.style.color = '#166534';
-        banner.innerHTML = '✅ Totals system is running';
-    }
-}
-
-    function updateAllTotals() {
-        // renderTable() can be added later - for now just run totals
-        buildTotalsFooter();
+        document.getElementById('grand-total-time').textContent = "0.0";
     }
 
     function updateAllTotals() {
-    renderTable();
-    // Small delay to ensure DOM is fully ready
-    setTimeout(() => {
+        renderTable();
         buildTotalsFooter();
-    }, 500);
-}
+    }
 
-window.onload = () => {
-    console.log("🚀 Page loaded");
-    loadFromFirebase();
-};
+    // Keep your other functions (showAddModal, hideModal, editFlight, deleteFlight, handleFormSubmit, exportToPDF, parseCustomDate, sortFlightsByDate, renderTable) as they are
+
+    window.onload = () => {
+        console.log("🚀 Page loaded");
+        loadFromFirebase();
+    };
 </script>
 </body>
 </html>
