@@ -54,6 +54,17 @@ function buildTotalsFooter() {
     // Paste all your other functions here (showAddModal, hideModal, editFlight, deleteFlight, handleFormSubmit, exportToPDF, etc.)
     // from your previous full code
 
-    window.onload = () => {
-        loadFromFirebase();
+        window.onload = () => {
+        console.log("🚀 Window onload triggered");
+        loadFromFirebase().then(() => {
+            console.log("✅ loadFromFirebase finished");
+            updateAllTotals();
+            // Force totals again after a short delay
+            setTimeout(() => {
+                console.log("🔄 Forcing totals update again");
+                buildTotalsFooter();
+            }, 800);
+        }).catch(err => {
+            console.error("Load failed:", err);
+        });
     };
