@@ -8,32 +8,37 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    
-    <link rel="stylesheet" href="style.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500&display=swap');
+        body { font-family: 'Inter', system_ui, sans-serif; font-size: 13px; }
+        .header-font { font-family: 'Space Grotesk', sans-serif; }
+        
+        .logbook-table th { background: #0a2540; color: white; font-weight: 600; text-transform: uppercase; font-size: 0.55rem; padding: 6px 4px; white-space: nowrap; }
+        .logbook-table td { padding: 8px 4px; border-bottom: 1px solid #e5e7eb; font-size: 0.8rem; text-align: center; }
+        .logbook-table tr:hover { background-color: #f8fafc; }
+        .table-wrapper { max-height: calc(100vh - 260px); overflow-y: auto; }
+    </style>
 </head>
 <body class="bg-slate-100 min-h-screen">
 
 <div class="max-w-screen-2xl mx-auto">
-    <!-- Header -->
-    <div class="bg-[#0a2540] text-white px-6 py-5 flex justify-between items-center shadow-lg">
+    <div class="bg-[#0a2540] text-white px-6 py-5 flex justify-between items-center">
         <div class="flex items-center gap-x-4">
             <div class="w-10 h-10 bg-white rounded-2xl flex items-center justify-center text-3xl">✈️</div>
             <div>
                 <h1 class="header-font text-3xl tracking-tighter">CANADIAN PILOT LOGBOOK</h1>
-                <p class="text-sky-300 text-xs tracking-widest">TRANSPORT CANADA • CARs COMPLIANT</p>
+                <p class="text-sky-300 text-xs">TRANSPORT CANADA • CARs COMPLIANT</p>
             </div>
         </div>
-        <button onclick="exportToPDF()" class="bg-white text-[#0a2540] px-6 py-3 rounded-2xl font-semibold hover:bg-amber-400 transition-colors text-sm">
-            📄 EXPORT PDF (A3 - FULL TABLE)
-        </button>
+        <button onclick="exportToPDF()" class="bg-white text-[#0a2540] px-6 py-3 rounded-2xl font-semibold hover:bg-amber-400">📄 EXPORT PDF</button>
     </div>
 
-    <!-- Toolbar -->
     <div class="bg-white border-b px-6 py-4 flex items-center justify-between sticky top-0 z-10">
         <button onclick="showAddModal()" class="flex items-center gap-x-2 bg-[#0a2540] text-white px-8 py-4 rounded-3xl font-semibold hover:bg-sky-700">
-            <span class="text-2xl">+</span> ADD NEW FLIGHT
+            + ADD NEW FLIGHT
         </button>
-        <div class="flex items-center gap-x-6 text-sm text-slate-500">
+        <div class="flex items-center gap-x-6">
             <span id="entry-count" class="font-medium">0 entries</span>
             <span id="sync-status" class="flex items-center gap-x-1 text-emerald-600">
                 <span class="inline-block w-2 h-2 bg-emerald-500 rounded-full"></span> Synced
@@ -41,72 +46,130 @@
         </div>
     </div>
 
-    <!-- Logbook Content -->
     <div class="px-6 pb-8">
         <div id="logbook-content" class="bg-white rounded-3xl shadow-xl overflow-hidden">
             <div class="table-wrapper overflow-x-auto" id="table-wrapper">
-                <table id="logbook-table" class="logbook-table w-full">
-                    <!-- Table header and body will be populated by JS -->
+                <table class="logbook-table w-full">
                     <thead>
                         <tr>
-                            <th class="w-28">DATE</th>
-                            <th class="w-40">AIRCRAFT TYPE</th>
-                            <th class="w-24">REG</th>
-                            <th class="w-20">FROM</th>
-                            <th class="w-20">TO</th>
-                            <th colspan="5" class="text-center">SINGLE-ENGINE</th>
-                            <th colspan="5" class="text-center">MULTI-ENGINE</th>
-                            <th colspan="4" class="text-center">X-COUNTRY</th>
-                            <th colspan="4" class="text-center">INSTRUMENT TIME</th>
-                            <th class="w-12">NIGHT LNDG</th>
-                            <th class="text-left w-56">PIC / CO-PILOT / REMARKS</th>
-                            <th class="w-16 no-print">ACTIONS</th>
+                            <th>DATE</th><th>AIRCRAFT</th><th>REG</th><th>FROM</th><th>TO</th>
+                            <th colspan="5">SINGLE-ENGINE</th>
+                            <th colspan="5">MULTI-ENGINE</th>
+                            <th colspan="4">X-COUNTRY</th>
+                            <th colspan="4">INSTRUMENT TIME</th>
+                            <th>NIGHT LNDG</th>
+                            <th class="text-left">PIC / CO / REMARKS</th>
+                            <th class="no-print">ACTIONS</th>
                         </tr>
-                        <tr class="bg-slate-700 text-[10px] text-white">
+                        <tr class="bg-slate-700 text-[10px]">
                             <th></th><th></th><th></th><th></th><th></th>
                             <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
                             <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
                             <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th>
                             <th>IMC</th><th>Hood</th><th>FTD</th><th>IFR</th>
-                            <th></th>
                             <th></th><th></th>
                         </tr>
                     </thead>
                     <tbody id="logbook-body"></tbody>
-                    <tfoot id="logbook-tfoot" class="bg-slate-100 border-t-4 border-[#0a2540] font-semibold text-[#0a2540]"></tfoot>
+                    <tfoot id="logbook-tfoot" class="bg-slate-100 border-t-4 border-[#0a2540]"></tfoot>
                 </table>
             </div>
 
-                        <!-- COLUMN TOTALS SUMMARY -->
+            <!-- COLUMN TOTALS SUMMARY with debug -->
             <div class="bg-slate-50 border-t-2 border-[#0a2540] px-8 py-8">
                 <div class="text-[#0a2540] font-medium mb-4 text-lg">COLUMN TOTALS SUMMARY</div>
                 
-                <!-- DEBUG BANNER -->
                 <div id="debug-banner" style="background:#fee2e2; color:#b91c1c; padding:12px; margin-bottom:12px; border-radius:8px; border:2px solid #ef4444; font-weight:bold;">
                     DEBUG: Waiting for totals...
                 </div>
                 
                 <div id="totals-grid" class="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-4 text-sm"></div>
             </div>
-
-                <div class="mt-8 pt-6 border-t flex justify-between items-baseline">
-                    <div class="text-[#0a2540]">
-                        <div class="text-lg font-semibold">GRAND TOTAL HOURS</div>
-                        <div class="text-xs text-slate-400">(Single-Engine + Multi-Engine only)</div>
-                    </div>
-                    <div id="grand-total-time" class="text-5xl font-bold text-emerald-600">0.0</div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Modal - keep your original modal here -->
 <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-    <!-- Your full modal HTML goes here - keep it exactly as in your last working version -->
-    <!-- For now, paste your original modal code inside this div -->
+    <!-- Paste your full modal HTML here from the version that was working -->
 </div>
 
-<script src="script.js"></script>
+<script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDXNNLgbrkYWbn32D34IBl18J7F1wcyJHQ",
+      authDomain: "canadian-pilot-logbook.firebaseapp.com",
+      projectId: "canadian-pilot-logbook",
+      storageBucket: "canadian-pilot-logbook.firebasestorage.app",
+      messagingSenderId: "74288469835",
+      appId: "1:74288469835:web:c8c3dbe90e65a69a9bbace"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let flights = [];
+    let editId = null;
+
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `fixed bottom-6 right-6 px-6 py-3 rounded-2xl text-white shadow-2xl z-50 ${type === 'success' ? 'bg-emerald-600' : 'bg-red-600'}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2500);
+    }
+
+    async function loadFromFirebase() {
+        try {
+            const snapshot = await db.collection("flights").get();
+            flights = [];
+            snapshot.forEach(doc => flights.push({ id: doc.id, ...doc.data() }));
+            document.getElementById('sync-status').innerHTML = `<span class="inline-block w-2 h-2 bg-emerald-500 rounded-full"></span> Synced`;
+            updateAllTotals();
+        } catch (e) {
+            console.error(e);
+            document.getElementById('sync-status').innerHTML = `<span class="inline-block w-2 h-2 bg-red-500 rounded-full"></span> Offline`;
+        }
+    }
+
+    function buildTotalsFooter() {
+        console.log("🔄 buildTotalsFooter called");
+
+        const banner = document.getElementById('debug-banner');
+        if (banner) {
+            banner.style.background = '#ecfdf5';
+            banner.style.color = '#10b981';
+            banner.style.borderColor = '#10b981';
+            banner.innerHTML = '✅ Totals system is running';
+        }
+
+        let xcDayDual = 0;
+        flights.forEach(f => {
+            xcDayDual += parseFloat(f.xcDayDual || 0);
+        });
+
+        document.getElementById('totals-grid').innerHTML = `
+            <div style="background:#fef3c7; padding:16px; border:3px solid #f59e0b; border-radius:12px;">
+                <strong>XC Day Dual:</strong> ${xcDayDual.toFixed(1)}
+            </div>
+        `;
+    }
+
+    function updateAllTotals() {
+        // renderTable() can be added later - for now just run totals
+        buildTotalsFooter();
+    }
+
+    function showAddModal() {
+        // your modal code
+        console.log("Add modal clicked");
+    }
+
+    // Add your other functions (editFlight, deleteFlight, handleFormSubmit, exportToPDF, etc.) here if needed
+
+    window.onload = () => {
+        console.log("🚀 Page loaded");
+        loadFromFirebase();
+    };
+</script>
 </body>
 </html>
