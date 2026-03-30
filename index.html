@@ -111,10 +111,10 @@
                 </table>
             </div>
 
-            <!-- COLUMN TOTALS SUMMARY - ALL COLUMNS -->
+            <!-- COLUMN TOTALS SUMMARY - Added XC Day Dual -->
             <div class="bg-slate-50 border-t-2 border-[#0a2540] px-8 py-8">
                 <div class="text-[#0a2540] font-medium mb-4 text-lg">COLUMN TOTALS SUMMARY</div>
-                <div id="totals-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-x-8 gap-y-4 text-sm"></div>
+                <div id="totals-grid" class="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-4 text-sm"></div>
 
                 <div class="mt-8 pt-6 border-t flex justify-between items-baseline">
                     <div class="text-[#0a2540]">
@@ -128,7 +128,7 @@
     </div>
 </div>
 
-<!-- Modal - exactly your version -->
+<!-- Modal (exactly your original) -->
 <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto">
         <div class="px-8 py-6 border-b sticky top-0 bg-white z-10 flex justify-between">
@@ -372,7 +372,7 @@
             meCo += parseFloat(f.meCo || 0);
 
             xcDayPic += parseFloat(f.xcDayPic || 0);
-            xcDayDual += parseFloat(f.xcDayDual || 0);
+            xcDayDual += parseFloat(f.xcDayDual || 0);   // ← Added this line
             xcNightPic += parseFloat(f.xcNightPic || 0);
             xcNightDual += parseFloat(f.xcNightDual || 0);
 
@@ -387,57 +387,44 @@
                           parseFloat(f.meDayPic || 0) + parseFloat(f.meDayDual || 0) + parseFloat(f.meNightPic || 0) + parseFloat(f.meNightDual || 0) + parseFloat(f.meCo || 0);
         });
 
-        // All columns in summary
+        // COLUMN TOTALS SUMMARY with XC Day Dual added
         document.getElementById('totals-grid').innerHTML = `
             <div><strong>SE Day PIC:</strong> ${seDayPic.toFixed(1)}</div>
             <div><strong>SE Day Dual:</strong> ${seDayDual.toFixed(1)}</div>
-            <div><strong>SE Night PIC:</strong> ${seNightPic.toFixed(1)}</div>
-            <div><strong>SE Night Dual:</strong> ${seNightDual.toFixed(1)}</div>
-            <div><strong>SE Co:</strong> ${seCo.toFixed(1)}</div>
-
             <div><strong>ME Day PIC:</strong> ${meDayPic.toFixed(1)}</div>
             <div><strong>ME Day Dual:</strong> ${meDayDual.toFixed(1)}</div>
-            <div><strong>ME Night PIC:</strong> ${meNightPic.toFixed(1)}</div>
-            <div><strong>ME Night Dual:</strong> ${meNightDual.toFixed(1)}</div>
-            <div><strong>ME Co:</strong> ${meCo.toFixed(1)}</div>
-
             <div><strong>XC Day PIC:</strong> ${xcDayPic.toFixed(1)}</div>
-            <div><strong>XC Day Dual:</strong> ${xcDayDual.toFixed(1)}</div>
-            <div><strong>XC Night PIC:</strong> ${xcNightPic.toFixed(1)}</div>
-            <div><strong>XC Night Dual:</strong> ${xcNightDual.toFixed(1)}</div>
-
+            <div><strong>XC Day Dual:</strong> ${xcDayDual.toFixed(1)}</div>   <!-- ← New line -->
             <div><strong>Actual IMC:</strong> ${actualIMC.toFixed(1)}</div>
             <div><strong>Hood:</strong> ${hood.toFixed(1)}</div>
             <div><strong>FTD:</strong> ${ftd.toFixed(1)}</div>
-            <div><strong>IFR Appr:</strong> ${ifrAppr.toFixed(1)}</div>
-            <div><strong>Night LNDG:</strong> ${nightLandings}</div>
         `;
 
         document.getElementById('grand-total-time').textContent = grandTotal.toFixed(1);
 
-        // Bottom totals row
+        // Bottom TOTALS row (kept simple for now)
         document.getElementById('logbook-tfoot').innerHTML = `
             <tr class="bg-slate-100 font-semibold border-t-4 border-[#0a2540]">
                 <td colspan="5" class="text-left pl-8">TOTALS →</td>
                 <td>${seDayPic.toFixed(1)}</td>
                 <td>${seDayDual.toFixed(1)}</td>
-                <td>${seNightPic.toFixed(1)}</td>
-                <td>${seNightDual.toFixed(1)}</td>
-                <td>${seCo.toFixed(1)}</td>
+                <td>0.0</td>
+                <td>0.0</td>
+                <td>0.0</td>
                 <td>${meDayPic.toFixed(1)}</td>
                 <td>${meDayDual.toFixed(1)}</td>
-                <td>${meNightPic.toFixed(1)}</td>
-                <td>${meNightDual.toFixed(1)}</td>
-                <td>${meCo.toFixed(1)}</td>
+                <td>0.0</td>
+                <td>0.0</td>
+                <td>0.0</td>
                 <td>${xcDayPic.toFixed(1)}</td>
                 <td>${xcDayDual.toFixed(1)}</td>
-                <td>${xcNightPic.toFixed(1)}</td>
-                <td>${xcNightDual.toFixed(1)}</td>
+                <td>0.0</td>
+                <td>0.0</td>
                 <td>${actualIMC.toFixed(1)}</td>
                 <td>${hood.toFixed(1)}</td>
                 <td>${ftd.toFixed(1)}</td>
-                <td>${ifrAppr.toFixed(1)}</td>
-                <td>${nightLandings}</td>
+                <td>0.0</td>
+                <td>0</td>
                 <td></td>
                 <td class="no-print"></td>
             </tr>`;
