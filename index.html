@@ -132,19 +132,21 @@
     }
 
     function buildTotalsFooter() {
-    console.log("✅ buildTotalsFooter running with", flights.length, "flights");
+    console.log("✅ buildTotalsFooter running -", flights.length, "flights");
 
     let xcDayDual = 0;
     flights.forEach(f => {
         xcDayDual += parseFloat(f.xcDayDual || 0);
     });
 
-    // Clean and professional COLUMN TOTALS SUMMARY
+    // Clean COLUMN TOTALS SUMMARY
     document.getElementById('totals-grid').innerHTML = `
-        <div><strong>XC Day Dual:</strong> ${xcDayDual.toFixed(1)}</div>
+        <div style="padding:12px 16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;">
+            <strong>XC Day Dual:</strong> ${xcDayDual.toFixed(1)}
+        </div>
     `;
 
-    // Update grand total (you can expand this later)
+    // Update grand total (you can expand later)
     document.getElementById('grand-total-time').textContent = "0.0";
 }
 
