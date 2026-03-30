@@ -6,8 +6,6 @@
     <title>Canadian Pilot Logbook</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500&display=swap');
@@ -39,10 +37,16 @@
             overflow-y: auto;
         }
 
+        /* Copied header - exactly 98% width, centered */
         .copied-header-container {
             width: 98%;
             margin-left: auto;
             margin-right: auto;
+        }
+
+        @media print {
+            .table-wrapper { max-height: none !important; overflow: visible !important; }
+            tr { page-break-inside: avoid !important; }
         }
     </style>
 </head>
@@ -63,7 +67,7 @@
         </button>
     </div>
 
-    <!-- Toolbar + 98% Copied Header -->
+    <!-- Toolbar + 98% Width Copied Header -->
     <div class="bg-white border-b px-6 py-4 sticky top-0 z-20">
         <div class="flex items-center justify-between mb-4">
             <button onclick="showAddModal()" class="flex items-center gap-x-2 bg-[#0a2540] text-white px-8 py-4 rounded-3xl font-semibold hover:bg-sky-700">
@@ -77,6 +81,7 @@
             </div>
         </div>
 
+        <!-- 98% Width Copied Header -->
         <div class="copied-header-container overflow-x-auto">
             <table class="logbook-table w-full">
                 <thead>
@@ -108,7 +113,7 @@
         </div>
     </div>
 
-    <!-- Main Table -->
+    <!-- Main Logbook Table -->
     <div class="px-6 pb-8">
         <div id="logbook-content" class="bg-white rounded-3xl shadow-xl overflow-hidden">
             <div class="table-wrapper overflow-x-auto" id="table-wrapper">
@@ -160,7 +165,7 @@
     </div>
 </div>
 
-<!-- Full Modal -->
+<!-- Full Modal with all fields -->
 <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto">
         <div class="px-8 py-6 border-b sticky top-0 bg-white z-10 flex justify-between">
@@ -170,8 +175,8 @@
         
         <form id="flight-form" onsubmit="handleFormSubmit(event)" class="p-8 grid grid-cols-12 gap-6">
             <div class="col-span-12 md:col-span-4">
-                <label class="block text-xs font-medium text-slate-500 mb-1">DATE</label>
-                <input type="text" id="form-date" placeholder="2023.aug.22" required class="w-full border border-slate-300 rounded-2xl px-5 py-4">
+                <label class="block text-xs font-medium text-slate-500 mb-1">DATE (e.g. 2023.aug.22)</label>
+                <input type="text" id="form-date" placeholder="2023.aug.22" required class="w-full border border-slate-300 rounded-2xl px-5 py-4 font-medium">
             </div>
             <div class="col-span-12 md:col-span-4">
                 <label class="block text-xs font-medium text-slate-500 mb-1">AIRCRAFT TYPE</label>
@@ -179,21 +184,21 @@
             </div>
             <div class="col-span-12 md:col-span-3">
                 <label class="block text-xs font-medium text-slate-500 mb-1">REG</label>
-                <input type="text" id="form-reg" placeholder="C-GABC" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase">
+                <input type="text" id="form-reg" placeholder="C-GABC" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
             </div>
 
             <div class="col-span-6 md:col-span-2">
                 <label class="block text-xs font-medium text-slate-500 mb-1">FROM</label>
-                <input type="text" id="form-from" placeholder="CYVR" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase">
+                <input type="text" id="form-from" placeholder="CYVR" maxlength="4" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
             </div>
             <div class="col-span-6 md:col-span-2">
                 <label class="block text-xs font-medium text-slate-500 mb-1">TO</label>
-                <input type="text" id="form-to" placeholder="CYLW" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase">
+                <input type="text" id="form-to" placeholder="CYLW" maxlength="4" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
             </div>
 
             <div class="col-span-12 md:col-span-2">
                 <label class="block text-xs font-medium text-slate-500 mb-1">TOTAL TIME</label>
-                <input type="number" id="form-total" step="0.1" value="1.0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center text-xl">
+                <input type="number" id="form-total" step="0.1" value="1.0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center text-xl font-semibold">
             </div>
 
             <div class="col-span-12 md:col-span-6">
@@ -250,7 +255,7 @@
                 </div>
             </div>
 
-            <!-- Instrument -->
+            <!-- Instrument Time -->
             <div class="col-span-12">
                 <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">INSTRUMENT TIME</div>
                 <div class="grid grid-cols-4 gap-4">
@@ -280,55 +285,24 @@
 </div>
 
 <script>
-    // Firebase Config
-    const firebaseConfig = {
-        apiKey: "AIzaSyDXNNLgbrkYWbn32D34IBl18J7F1wcyJHQ",
-        authDomain: "canadian-pilot-logbook.firebaseapp.com",
-        projectId: "canadian-pilot-logbook",
-        storageBucket: "canadian-pilot-logbook.firebasestorage.app",
-        messagingSenderId: "74288469835",
-        appId: "1:74288469835:web:c8c3dbe90e65a69a9bbace"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
     let flights = [];
     let editId = null;
 
-    async function loadData() {
-        try {
-            const snapshot = await db.collection('flights').get();
-            flights = [];
-            snapshot.forEach(doc => {
-                flights.push(doc.data());
-            });
-        } catch (e) {
-            console.log("Firebase load failed, using local");
-        }
-
+    function loadData() {
         const saved = localStorage.getItem('canadianPilotLogbook');
-        if (saved && flights.length === 0) {
-            flights = JSON.parse(saved);
-        }
+        if (saved) flights = JSON.parse(saved);
         updateAllTotals();
     }
 
     function saveData() {
         localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
 
-        // Download JSON file
         const dataStr = JSON.stringify(flights, null, 2);
         const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
         const link = document.createElement('a');
         link.setAttribute('href', dataUri);
         link.setAttribute('download', 'canadianPilotLogbook.json');
         link.click();
-
-        // Sync to Firebase using local ID
-        flights.forEach(flight => {
-            db.collection('flights').doc(flight.id).set(flight).catch(err => console.log("Firebase sync failed", err));
-        });
     }
 
     function downloadLocalFile() {
@@ -364,11 +338,11 @@
         sorted.forEach(f => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${f.date || ''}</td>
+                <td class="font-medium">${f.date || ''}</td>
                 <td class="text-left">${f.aircraftType || ''}</td>
-                <td>${f.registration || ''}</td>
-                <td>${f.from || ''}</td>
-                <td>${f.to || ''}</td>
+                <td class="font-mono">${f.registration || ''}</td>
+                <td class="font-mono">${f.from || ''}</td>
+                <td class="font-mono">${f.to || ''}</td>
                 <td>${parseFloat(f.seDayPic||0).toFixed(1)}</td>
                 <td>${parseFloat(f.seDayDual||0).toFixed(1)}</td>
                 <td>${parseFloat(f.seNightPic||0).toFixed(1)}</td>
@@ -388,7 +362,7 @@
                 <td>${parseFloat(f.ftd||0).toFixed(1)}</td>
                 <td>${parseFloat(f.ifrAppr||0).toFixed(1)}</td>
                 <td>${parseInt(f.nightLandings||0)}</td>
-                <td class="text-left text-xs">${f.picName ? 'PIC: ' + f.picName : ''}${f.copilotName ? '<br>Co: ' + f.copilotName : ''}<br>${f.remarks || ''}</td>
+                <td class="text-left text-xs">${f.picName ? '<strong>PIC:</strong> ' + f.picName : ''}${f.copilotName ? '<br><strong>Co:</strong> ' + f.copilotName : ''}<br>${f.remarks || ''}</td>
                 <td class="no-print">
                     <button onclick="editFlight('${f.id}')" class="text-sky-600 hover:text-sky-800 px-2 py-1 text-lg">✏️</button>
                     <button onclick="deleteFlight('${f.id}')" class="text-red-600 hover:text-red-800 px-2 py-1 text-lg ml-2">🗑</button>
@@ -537,7 +511,7 @@
     }
 
     function deleteFlight(id) {
-        if (!confirm("Delete this flight?")) return;
+        if (!confirm("Delete this flight permanently?")) return;
         flights = flights.filter(f => f.id !== id);
         updateAllTotals();
         saveData();
@@ -596,7 +570,7 @@
         }
 
         updateAllTotals();
-        saveData();   // Saves to local + Firebase
+        saveData();
         hideModal();
         showToast(editId ? "Flight updated" : "New flight saved");
         saveBtn.textContent = originalText;
@@ -615,12 +589,26 @@
             margin: [0.35, 0.25, 0.45, 0.25],
             filename: `Canadian_Pilot_Logbook_${new Date().toISOString().slice(0,10)}.pdf`,
             image: { type: 'jpeg', quality: 0.92 },
-            html2canvas: { scale: 1.5, useCORS: true, letterRendering: true, scrollY: 0, height: element.scrollHeight + 700 },
-            jsPDF: { unit: 'in', format: 'a3', orientation: 'landscape' },
+            html2canvas: { 
+                scale: 1.5,
+                useCORS: true,
+                letterRendering: true,
+                scrollY: 0,
+                height: element.scrollHeight + 700
+            },
+            jsPDF: { 
+                unit: 'in', 
+                format: 'a3', 
+                orientation: 'landscape' 
+            },
             pagebreak: { mode: ['css', 'legacy'] }
         };
 
         html2pdf().set(opt).from(element).save().then(() => {
+            wrapper.style.maxHeight = originalMaxHeight;
+            element.style.height = '';
+        }).catch(err => {
+            console.error(err);
             wrapper.style.maxHeight = originalMaxHeight;
             element.style.height = '';
         });
