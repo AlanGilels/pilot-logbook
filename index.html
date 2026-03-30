@@ -11,10 +11,8 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500&display=swap');
-        
         body { font-family: 'Inter', system_ui, sans-serif; font-size: 13px; }
         .header-font { font-family: 'Space Grotesk', sans-serif; }
-        
         .logbook-table th {
             background: #0a2540;
             color: white;
@@ -33,23 +31,14 @@
             text-align: center;
         }
         .logbook-table tr:hover { background-color: #f8fafc; }
-
-        .table-wrapper {
-            max-height: calc(100vh - 360px);
-            overflow-y: auto;
-        }
-
-        .copied-header-container {
-            width: 98%;
-            margin-left: auto;
-            margin-right: auto;
-        }
+        .table-wrapper { max-height: calc(100vh - 360px); overflow-y: auto; }
+        .copied-header-container { width: 98%; margin-left: auto; margin-right: auto; }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen">
 
 <div class="max-w-screen-2xl mx-auto">
-    <!-- Top Header -->
+    <!-- Header -->
     <div class="bg-[#0a2540] text-white px-6 py-5 flex justify-between items-center shadow-lg">
         <div class="flex items-center gap-x-4">
             <div class="w-10 h-10 bg-white rounded-2xl flex items-center justify-center text-3xl">✈️</div>
@@ -70,22 +59,17 @@
                 <span class="text-2xl">+</span> ADD NEW FLIGHT
             </button>
             
-            <div class="flex items-center gap-x-6">
-                <button onclick="downloadLocalFile()" class="px-6 py-3 border border-slate-300 rounded-3xl text-sm hover:bg-slate-50 flex items-center gap-2">
-                    💾 Download JSON
-                </button>
-                <button onclick="forceFullSync()" class="px-6 py-3 bg-emerald-600 text-white rounded-3xl text-sm hover:bg-emerald-700 flex items-center gap-2">
-                    🔄 FORCE FULL SYNC (Local + Cloud)
-                </button>
+            <div class="flex items-center gap-x-4">
+                <button onclick="downloadLocalFile()" class="px-6 py-3 border border-slate-300 rounded-3xl text-sm hover:bg-slate-50">💾 Download JSON</button>
+                <button onclick="forceFullSync()" class="px-6 py-3 bg-emerald-600 text-white rounded-3xl text-sm hover:bg-emerald-700">🔄 FORCE FULL SYNC</button>
             </div>
 
-            <div class="text-sm text-slate-500 flex items-center gap-3">
+            <div class="text-sm text-slate-500">
                 <span id="entry-count">0 entries</span>
-                <span class="text-emerald-600 text-xs font-medium">• Local file is used (no GitHub)</span>
             </div>
         </div>
 
-        <!-- 98% Copied Header (exactly as you asked) -->
+        <!-- Copied Header -->
         <div class="copied-header-container overflow-x-auto">
             <table class="logbook-table w-full">
                 <thead>
@@ -109,7 +93,6 @@
                         <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
                         <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th>
                         <th>IMC</th><th>Hood</th><th>FTD</th><th>IFR</th>
-                        <th></th>
                         <th></th><th></th>
                     </tr>
                 </thead>
@@ -117,7 +100,7 @@
         </div>
     </div>
 
-    <!-- Main Table -->
+    <!-- Main Content -->
     <div class="px-6 pb-8">
         <div id="logbook-content" class="bg-white rounded-3xl shadow-xl overflow-hidden">
             <div class="table-wrapper overflow-x-auto" id="table-wrapper">
@@ -143,7 +126,6 @@
                             <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
                             <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th>
                             <th>IMC</th><th>Hood</th><th>FTD</th><th>IFR</th>
-                            <th></th>
                             <th></th><th></th>
                         </tr>
                     </thead>
@@ -152,11 +134,10 @@
                 </table>
             </div>
 
-            <!-- COLUMN TOTALS SUMMARY -->
+            <!-- Totals Summary -->
             <div class="bg-slate-50 border-t-2 border-[#0a2540] px-8 py-8">
                 <div class="text-[#0a2540] font-medium mb-4 text-lg">COLUMN TOTALS SUMMARY</div>
                 <div id="totals-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-x-8 gap-y-4 text-sm"></div>
-
                 <div class="mt-8 pt-6 border-t flex justify-between items-baseline">
                     <div class="text-[#0a2540]">
                         <div class="text-lg font-semibold">GRAND TOTAL HOURS</div>
@@ -169,7 +150,7 @@
     </div>
 </div>
 
-<!-- Modal (unchanged - full form) -->
+<!-- Modal -->
 <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto">
         <div class="px-8 py-6 border-b sticky top-0 bg-white z-10 flex justify-between">
@@ -178,7 +159,6 @@
         </div>
         
         <form id="flight-form" onsubmit="handleFormSubmit(event)" class="p-8 grid grid-cols-12 gap-6">
-            <!-- All form fields exactly as before (date, type, reg, from/to, total, pic, copilot, all SE/ME/XC/Instrument fields, night landings, remarks) -->
             <div class="col-span-12 md:col-span-4">
                 <label class="block text-xs font-medium text-slate-500 mb-1">DATE (e.g. 2023.aug.22)</label>
                 <input type="text" id="form-date" placeholder="2023.aug.22" required class="w-full border border-slate-300 rounded-2xl px-5 py-4 font-medium">
@@ -305,35 +285,39 @@
     let flights = [];
     let editId = null;
 
-    // NEW MERGE LOGIC - NO EXCLUSION
+    // Improved load with strong persistence
     async function loadData() {
         flights = [];
 
-        // 1. Load everything from localStorage first (your computer flights)
+        // 1. Load from localStorage first (computer has most flights)
         const localData = localStorage.getItem('canadianPilotLogbook');
-        let localFlights = localData ? JSON.parse(localData) : [];
-
-        // 2. Load everything from cloud (your iPad flights + anything already uploaded)
-        let cloudFlights = [];
-        try {
-            const snapshot = await db.collection('flights').get();
-            snapshot.forEach(doc => cloudFlights.push(doc.data()));
-        } catch (e) {
-            console.log("Cloud not reachable - using local only");
+        if (localData) {
+            flights = JSON.parse(localData);
         }
 
-        // 3. Cross-reference: combine BOTH sources, keep every unique ID (nothing is excluded)
-        const mergedMap = new Map();
-        [...localFlights, ...cloudFlights].forEach(f => {
-            if (f && f.id) mergedMap.set(f.id, f);
-        });
+        // 2. Load from cloud and add missing flights
+        try {
+            const snapshot = await db.collection('flights').get();
+            const cloudFlights = [];
+            snapshot.forEach(doc => cloudFlights.push(doc.data()));
 
-        flights = Array.from(mergedMap.values());
+            const existingIds = new Set(flights.map(f => f.id));
 
-        // 4. Save the complete merged list back to localStorage and to cloud
+            cloudFlights.forEach(cf => {
+                if (cf && cf.id && !existingIds.has(cf.id)) {
+                    flights.push(cf);
+                }
+            });
+        } catch (e) {
+            console.log("Cloud not reachable");
+        }
+
+        // 3. Save the FULL merged list back to localStorage
         localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
-        flights.forEach(flight => {
-            db.collection('flights').doc(flight.id).set(flight).catch(() => {});
+
+        // 4. Upload everything to Firebase
+        flights.forEach(f => {
+            db.collection('flights').doc(f.id).set(f).catch(() => {});
         });
 
         updateAllTotals();
@@ -342,37 +326,32 @@
     function saveData() {
         localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
 
-        // Auto-download JSON (your local backup)
+        // Auto-download JSON with current full data
         const dataStr = JSON.stringify(flights, null, 2);
         const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
         const link = document.createElement('a');
-        link.setAttribute('href', dataUri);
-        link.setAttribute('download', 'canadianPilotLogbook.json');
+        link.href = dataUri;
+        link.download = 'canadianPilotLogbook.json';
         link.click();
 
-        // Push everything to cloud
-        flights.forEach(flight => {
-            db.collection('flights').doc(flight.id).set(flight).catch(() => {});
+        // Upload to cloud
+        flights.forEach(f => {
+            db.collection('flights').doc(f.id).set(f).catch(() => {});
         });
     }
 
-    function downloadLocalFile() {
-        const dataStr = JSON.stringify(flights, null, 2);
-        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-        const link = document.createElement('a');
-        link.setAttribute('href', dataUri);
-        link.setAttribute('download', 'canadianPilotLogbook.json');
-        link.click();
-    }
-
     async function forceFullSync() {
-        if (confirm("Force full sync from cloud + local? This will merge everything and upload any missing flights.")) {
+        if (confirm("Force full sync? This will merge all local and cloud flights and save everything.")) {
             await loadData();
-            showToast("✅ Full sync complete – all flights from local + cloud are now merged");
+            showToast("✅ Full merge complete. Download JSON again to check.");
         }
     }
 
-    // ==================== Rest of the app (unchanged) ====================
+    function downloadLocalFile() {
+        saveData();
+        showToast("JSON downloaded");
+    }
+
     function parseCustomDate(dateStr) {
         if (!dateStr) return new Date(0);
         let cleaned = dateStr.toLowerCase().replace(/\.+/g, '.').trim();
@@ -484,15 +463,23 @@
         buildTotalsFooter();
     }
 
-    function showAddModal() { editId = null; document.getElementById('modal-title').textContent = 'Add New Flight'; document.getElementById('flight-form').reset(); document.getElementById('modal').classList.remove('hidden'); }
-    function hideModal() { document.getElementById('modal').classList.add('hidden'); }
+    function showAddModal() {
+        editId = null;
+        document.getElementById('modal-title').textContent = 'Add New Flight';
+        document.getElementById('flight-form').reset();
+        document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function hideModal() {
+        document.getElementById('modal').classList.add('hidden');
+    }
 
     function editFlight(id) {
         const flight = flights.find(f => f.id === id);
         if (!flight) return;
         editId = id;
         document.getElementById('modal-title').textContent = 'Edit Flight';
-        // populate all form fields (same as previous version)
+
         document.getElementById('form-date').value = flight.date || '';
         document.getElementById('form-type').value = flight.aircraftType || '';
         document.getElementById('form-reg').value = flight.registration || '';
@@ -521,6 +508,7 @@
         document.getElementById('form-ifr-appr').value = flight.ifrAppr || 0;
         document.getElementById('form-nightland').value = flight.nightLandings || 0;
         document.getElementById('form-remarks').value = flight.remarks || '';
+
         document.getElementById('modal').classList.remove('hidden');
     }
 
