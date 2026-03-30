@@ -36,6 +36,8 @@ function buildTotalsFooter() {
 
     console.log("✅ XC Day Dual value =", xcDayDual.toFixed(1));
 }
+
+
     function updateAllTotals() {
         renderTable();
         buildTotalsFooter();
