@@ -119,49 +119,48 @@
     }
 
     async function loadFromFirebase() {
-        try {
-            const snapshot = await db.collection("flights").get();
-            flights = [];
-            snapshot.forEach(doc => flights.push({ id: doc.id, ...doc.data() }));
-            document.getElementById('sync-status').innerHTML = `<span class="inline-block w-2 h-2 bg-emerald-500 rounded-full"></span> Synced`;
-            updateAllTotals();
-        } catch (e) {
-            console.error(e);
-            document.getElementById('sync-status').innerHTML = `<span class="inline-block w-2 h-2 bg-red-500 rounded-full"></span> Offline`;
-        }
+    try {
+        const snapshot = await db.collection("flights").get();
+        flights = [];
+        snapshot.forEach(doc => {
+            flights.push({ id: doc.id, ...doc.data() });
+        });
+        document.getElementById('sync-status').innerHTML = `<span class="inline-block w-2 h-2 bg-emerald-500 rounded-full"></span> Synced`;
+        
+        console.log("✅ Data loaded, calling updateAllTotals");
+        updateAllTotals();
+    } catch (e) {
+        console.error(e);
+        document.getElementById('sync-status').innerHTML = `<span class="inline-block w-2 h-2 bg-red-500 rounded-full"></span> Offline`;
     }
+}
 
     function buildTotalsFooter() {
-    console.log("🔄 buildTotalsFooter called");
+    console.log("🔄 buildTotalsFooter running");
 
-    // Small delay to make sure DOM elements exist
-    setTimeout(() => {
-        const banner = document.getElementById('debug-banner');
-        if (banner) {
-            banner.style.background = '#ecfdf5';
-            banner.style.color = '#166534';
-            banner.style.borderColor = '#4ade80';
-            banner.innerHTML = '✅ Totals system is running';
-        }
+    let xcDayDual = 0;
+    flights.forEach(f => {
+        xcDayDual += parseFloat(f.xcDayDual || 0);
+    });
 
-        const grid = document.getElementById('totals-grid');
-        if (grid) {
-            let xcDayDual = 0;
-            flights.forEach(f => {
-                xcDayDual += parseFloat(f.xcDayDual || 0);
-            });
+    // Update the grid
+    const grid = document.getElementById('totals-grid');
+    if (grid) {
+        grid.innerHTML = `
+            <div style="background:#fef3c7; padding:16px; border:3px solid #f59e0b; border-radius:12px; text-align:center;">
+                <strong>XC Day Dual:</strong><br>
+                <span style="font-size:24px; font-weight:bold;">${xcDayDual.toFixed(1)}</span>
+            </div>
+        `;
+    }
 
-            grid.innerHTML = `
-                <div style="background:#fef3c7; padding:16px; border:3px solid #f59e0b; border-radius:12px; text-align:center;">
-                    <strong>XC Day Dual:</strong><br>
-                    <span style="font-size:24px; font-weight:bold;">${xcDayDual.toFixed(1)}</span>
-                </div>
-            `;
-            console.log("✅ Yellow box inserted - XC Day Dual =", xcDayDual.toFixed(1));
-        } else {
-            console.error("❌ totals-grid element not found");
-        }
-    }, 300); // 300ms delay
+    // Update debug banner if it exists
+    const banner = document.getElementById('debug-banner');
+    if (banner) {
+        banner.style.background = '#ecfdf5';
+        banner.style.color = '#166534';
+        banner.innerHTML = '✅ Totals system is running';
+    }
 }
 
     function updateAllTotals() {
@@ -169,15 +168,16 @@
         buildTotalsFooter();
     }
 
-    function showAddModal() {
-        // your modal code
-        console.log("Add modal clicked");
-    }
+    function updateAllTotals() {
+    renderTable();
+    // Small delay to ensure DOM is fully ready
+    setTimeout(() => {
+        buildTotalsFooter();
+    }, 500);
+}
 
-    // Add your other functions (editFlight, deleteFlight, handleFormSubmit, exportToPDF, etc.) here if needed
-
-   window.onload = () => {
-    console.log("🚀 Page loaded - calling loadFromFirebase");
+window.onload = () => {
+    console.log("🚀 Page loaded");
     loadFromFirebase();
 };
 </script>
