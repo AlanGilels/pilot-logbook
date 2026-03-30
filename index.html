@@ -35,20 +35,21 @@
         .logbook-table tr:hover { background-color: #f8fafc; }
 
         .table-wrapper {
-            max-height: calc(100vh - 260px);
+            max-height: calc(100vh - 360px);
             overflow-y: auto;
         }
 
-        @media print {
-            .table-wrapper { max-height: none !important; overflow: visible !important; }
-            tr { page-break-inside: avoid !important; }
+        .copied-header-container {
+            width: 98%;
+            margin-left: auto;
+            margin-right: auto;
         }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen">
 
 <div class="max-w-screen-2xl mx-auto">
-    <!-- Header -->
+    <!-- Top Header -->
     <div class="bg-[#0a2540] text-white px-6 py-5 flex justify-between items-center shadow-lg">
         <div class="flex items-center gap-x-4">
             <div class="w-10 h-10 bg-white rounded-2xl flex items-center justify-center text-3xl">✈️</div>
@@ -62,23 +63,54 @@
         </button>
     </div>
 
-    <!-- Toolbar -->
-    <div class="bg-white border-b px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-        <button onclick="showAddModal()" class="flex items-center gap-x-2 bg-[#0a2540] text-white px-8 py-4 rounded-3xl font-semibold hover:bg-sky-700">
-            <span class="text-2xl">+</span> ADD NEW FLIGHT
-        </button>
-        <div class="flex items-center gap-x-6 text-sm text-slate-500">
-            <span id="entry-count" class="font-medium">0 entries</span>
-            <span id="sync-status" class="flex items-center gap-x-1 text-emerald-600">
-                <span class="inline-block w-2 h-2 bg-emerald-500 rounded-full"></span> Synced
-            </span>
+    <!-- Toolbar + 98% Copied Header -->
+    <div class="bg-white border-b px-6 py-4 sticky top-0 z-20">
+        <div class="flex items-center justify-between mb-4">
+            <button onclick="showAddModal()" class="flex items-center gap-x-2 bg-[#0a2540] text-white px-8 py-4 rounded-3xl font-semibold hover:bg-sky-700">
+                <span class="text-2xl">+</span> ADD NEW FLIGHT
+            </button>
+            <div class="flex gap-4">
+                <button onclick="downloadLocalFile()" class="px-5 py-2 border border-slate-300 rounded-2xl text-sm hover:bg-slate-50">💾 Download Data File</button>
+            </div>
+            <div class="text-sm text-slate-500">
+                <span id="entry-count">0 entries</span>
+            </div>
+        </div>
+
+        <div class="copied-header-container overflow-x-auto">
+            <table class="logbook-table w-full">
+                <thead>
+                    <tr>
+                        <th class="w-28">DATE</th>
+                        <th class="w-40">AIRCRAFT TYPE</th>
+                        <th class="w-24">REG</th>
+                        <th class="w-20">FROM</th>
+                        <th class="w-20">TO</th>
+                        <th colspan="5" class="text-center">SINGLE-ENGINE</th>
+                        <th colspan="5" class="text-center">MULTI-ENGINE</th>
+                        <th colspan="4" class="text-center">X-COUNTRY</th>
+                        <th colspan="4" class="text-center">INSTRUMENT TIME</th>
+                        <th class="w-12">NIGHT LNDG</th>
+                        <th class="text-left w-56">PIC / CO-PILOT / REMARKS</th>
+                        <th class="w-16 no-print">ACTIONS</th>
+                    </tr>
+                    <tr class="bg-slate-700 text-[10px] text-white">
+                        <th></th><th></th><th></th><th></th><th></th>
+                        <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
+                        <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
+                        <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th>
+                        <th>IMC</th><th>Hood</th><th>FTD</th><th>IFR</th>
+                        <th></th>
+                        <th></th><th></th>
+                    </tr>
+                </thead>
+            </table>
         </div>
     </div>
 
-    <!-- Logbook Content -->
+    <!-- Main Table -->
     <div class="px-6 pb-8">
         <div id="logbook-content" class="bg-white rounded-3xl shadow-xl overflow-hidden">
-            
             <div class="table-wrapper overflow-x-auto" id="table-wrapper">
                 <table id="logbook-table" class="logbook-table w-full">
                     <thead>
@@ -111,31 +143,24 @@
                 </table>
             </div>
 
-            <!-- COLUMN TOTALS SUMMARY with FTD -->
-            <div class="bg-slate-50 border-t-2 border-[#0a2540] px-8 py-6 grid grid-cols-12 gap-6 text-sm">
-                <div class="col-span-12 md:col-span-5">
-                    <div class="text-[#0a2540] font-medium mb-3">COLUMN TOTALS SUMMARY</div>
-                    <div id="totals-grid" class="grid grid-cols-3 gap-y-2 text-xs leading-tight"></div>
-                </div>
-                <div class="col-span-12 md:col-span-7 border-l border-slate-300 pl-8">
-                    <div class="flex justify-between items-baseline text-[#0a2540]">
-                        <div class="text-lg font-semibold">GRAND TOTAL HOURS<br><span class="text-xs font-normal text-slate-400">(Single-Engine + Multi-Engine only)</span></div>
-                        <div id="grand-total-time" class="text-6xl font-semibold tabular-nums leading-none">0.0</div>
+            <!-- COLUMN TOTALS SUMMARY -->
+            <div class="bg-slate-50 border-t-2 border-[#0a2540] px-8 py-8">
+                <div class="text-[#0a2540] font-medium mb-4 text-lg">COLUMN TOTALS SUMMARY</div>
+                <div id="totals-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-x-8 gap-y-4 text-sm"></div>
+
+                <div class="mt-8 pt-6 border-t flex justify-between items-baseline">
+                    <div class="text-[#0a2540]">
+                        <div class="text-lg font-semibold">GRAND TOTAL HOURS</div>
+                        <div class="text-xs text-slate-400">(Single-Engine + Multi-Engine only)</div>
                     </div>
-                    <div class="mt-4 flex flex-wrap gap-x-8 gap-y-1 text-xs text-slate-500">
-                        <div>Single-Engine: <span id="se-total" class="font-medium">0.0</span></div>
-                        <div>Multi-Engine: <span id="me-total" class="font-medium">0.0</span></div>
-                        <div>Night: <span id="night-total" class="font-medium">0.0</span></div>
-                        <div>X-Country: <span id="xc-total" class="font-medium">0.0</span></div>
-                        <div>Instrument: <span id="inst-total" class="font-medium">0.0</span></div>
-                    </div>
+                    <div id="grand-total-time" class="text-5xl font-bold text-emerald-600">0.0</div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Full Modal -->
 <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto">
         <div class="px-8 py-6 border-b sticky top-0 bg-white z-10 flex justify-between">
@@ -145,8 +170,8 @@
         
         <form id="flight-form" onsubmit="handleFormSubmit(event)" class="p-8 grid grid-cols-12 gap-6">
             <div class="col-span-12 md:col-span-4">
-                <label class="block text-xs font-medium text-slate-500 mb-1">DATE (e.g. 2023.aug.22)</label>
-                <input type="text" id="form-date" placeholder="2023.aug.22" required class="w-full border border-slate-300 rounded-2xl px-5 py-4 font-medium">
+                <label class="block text-xs font-medium text-slate-500 mb-1">DATE</label>
+                <input type="text" id="form-date" placeholder="2023.aug.22" required class="w-full border border-slate-300 rounded-2xl px-5 py-4">
             </div>
             <div class="col-span-12 md:col-span-4">
                 <label class="block text-xs font-medium text-slate-500 mb-1">AIRCRAFT TYPE</label>
@@ -154,21 +179,21 @@
             </div>
             <div class="col-span-12 md:col-span-3">
                 <label class="block text-xs font-medium text-slate-500 mb-1">REG</label>
-                <input type="text" id="form-reg" placeholder="C-GABC" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
+                <input type="text" id="form-reg" placeholder="C-GABC" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase">
             </div>
 
             <div class="col-span-6 md:col-span-2">
                 <label class="block text-xs font-medium text-slate-500 mb-1">FROM</label>
-                <input type="text" id="form-from" placeholder="CYVR" maxlength="4" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
+                <input type="text" id="form-from" placeholder="CYVR" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase">
             </div>
             <div class="col-span-6 md:col-span-2">
                 <label class="block text-xs font-medium text-slate-500 mb-1">TO</label>
-                <input type="text" id="form-to" placeholder="CYLW" maxlength="4" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
+                <input type="text" id="form-to" placeholder="CYLW" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase">
             </div>
 
             <div class="col-span-12 md:col-span-2">
                 <label class="block text-xs font-medium text-slate-500 mb-1">TOTAL TIME</label>
-                <input type="number" id="form-total" step="0.1" value="1.0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center text-xl font-semibold">
+                <input type="number" id="form-total" step="0.1" value="1.0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center text-xl">
             </div>
 
             <div class="col-span-12 md:col-span-6">
@@ -225,7 +250,7 @@
                 </div>
             </div>
 
-            <!-- Instrument Time -->
+            <!-- Instrument -->
             <div class="col-span-12">
                 <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">INSTRUMENT TIME</div>
                 <div class="grid grid-cols-4 gap-4">
@@ -236,11 +261,9 @@
                 </div>
             </div>
 
-            <div class="col-span-12 grid grid-cols-1 gap-6">
-                <div>
-                    <label class="block text-xs font-medium text-slate-500 mb-1">NIGHT LANDINGS</label>
-                    <input type="number" id="form-nightland" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4">
-                </div>
+            <div class="col-span-12">
+                <label class="block text-xs font-medium text-slate-500 mb-1">NIGHT LANDINGS</label>
+                <input type="number" id="form-nightland" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4">
             </div>
 
             <div class="col-span-12">
@@ -257,14 +280,14 @@
 </div>
 
 <script>
+    // Firebase Config
     const firebaseConfig = {
-      apiKey: "AIzaSyDXNNLgbrkYWbn32D34IBl18J7F1wcyJHQ",
-      authDomain: "canadian-pilot-logbook.firebaseapp.com",
-      projectId: "canadian-pilot-logbook",
-      storageBucket: "canadian-pilot-logbook.firebasestorage.app",
-      messagingSenderId: "74288469835",
-      appId: "1:74288469835:web:c8c3dbe90e65a69a9bbace",
-      measurementId: "G-VF4JDKXP42"
+        apiKey: "AIzaSyDXNNLgbrkYWbn32D34IBl18J7F1wcyJHQ",
+        authDomain: "canadian-pilot-logbook.firebaseapp.com",
+        projectId: "canadian-pilot-logbook",
+        storageBucket: "canadian-pilot-logbook.firebasestorage.app",
+        messagingSenderId: "74288469835",
+        appId: "1:74288469835:web:c8c3dbe90e65a69a9bbace"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -273,32 +296,49 @@
     let flights = [];
     let editId = null;
 
-    function showToast(message, type = 'success') {
-        const toast = document.createElement('div');
-        toast.className = `fixed bottom-6 right-6 px-6 py-3 rounded-2xl text-white shadow-2xl z-50 ${type === 'success' ? 'bg-emerald-600' : 'bg-red-600'}`;
-        toast.textContent = message;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 2500);
-    }
-
-    async function loadFromFirebase() {
+    async function loadData() {
         try {
-            const snapshot = await db.collection("flights").get();
+            const snapshot = await db.collection('flights').get();
             flights = [];
             snapshot.forEach(doc => {
-                flights.push({ id: doc.id, ...doc.data() });
+                flights.push(doc.data());
             });
-            updateAllTotals();
-            document.getElementById('sync-status').innerHTML = `<span class="inline-block w-2 h-2 bg-emerald-500 rounded-full"></span> Synced`;
         } catch (e) {
-            console.error(e);
-            document.getElementById('sync-status').innerHTML = `<span class="inline-block w-2 h-2 bg-red-500 rounded-full"></span> Offline`;
+            console.log("Firebase load failed, using local");
         }
+
+        const saved = localStorage.getItem('canadianPilotLogbook');
+        if (saved && flights.length === 0) {
+            flights = JSON.parse(saved);
+        }
+        updateAllTotals();
     }
 
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') loadFromFirebase();
-    });
+    function saveData() {
+        localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
+
+        // Download JSON file
+        const dataStr = JSON.stringify(flights, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+        const link = document.createElement('a');
+        link.setAttribute('href', dataUri);
+        link.setAttribute('download', 'canadianPilotLogbook.json');
+        link.click();
+
+        // Sync to Firebase using local ID
+        flights.forEach(flight => {
+            db.collection('flights').doc(flight.id).set(flight).catch(err => console.log("Firebase sync failed", err));
+        });
+    }
+
+    function downloadLocalFile() {
+        const dataStr = JSON.stringify(flights, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+        const link = document.createElement('a');
+        link.setAttribute('href', dataUri);
+        link.setAttribute('download', 'canadianPilotLogbook.json');
+        link.click();
+    }
 
     function parseCustomDate(dateStr) {
         if (!dateStr) return new Date(0);
@@ -324,11 +364,11 @@
         sorted.forEach(f => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td class="font-medium">${f.date || ''}</td>
+                <td>${f.date || ''}</td>
                 <td class="text-left">${f.aircraftType || ''}</td>
-                <td class="font-mono">${f.registration || ''}</td>
-                <td class="font-mono">${f.from || ''}</td>
-                <td class="font-mono">${f.to || ''}</td>
+                <td>${f.registration || ''}</td>
+                <td>${f.from || ''}</td>
+                <td>${f.to || ''}</td>
                 <td>${parseFloat(f.seDayPic||0).toFixed(1)}</td>
                 <td>${parseFloat(f.seDayDual||0).toFixed(1)}</td>
                 <td>${parseFloat(f.seNightPic||0).toFixed(1)}</td>
@@ -348,7 +388,7 @@
                 <td>${parseFloat(f.ftd||0).toFixed(1)}</td>
                 <td>${parseFloat(f.ifrAppr||0).toFixed(1)}</td>
                 <td>${parseInt(f.nightLandings||0)}</td>
-                <td class="text-left text-xs">${f.picName ? '<strong>PIC:</strong> ' + f.picName : ''}${f.copilotName ? '<br><strong>Co:</strong> ' + f.copilotName : ''}<br>${f.remarks || ''}</td>
+                <td class="text-left text-xs">${f.picName ? 'PIC: ' + f.picName : ''}${f.copilotName ? '<br>Co: ' + f.copilotName : ''}<br>${f.remarks || ''}</td>
                 <td class="no-print">
                     <button onclick="editFlight('${f.id}')" class="text-sky-600 hover:text-sky-800 px-2 py-1 text-lg">✏️</button>
                     <button onclick="deleteFlight('${f.id}')" class="text-red-600 hover:text-red-800 px-2 py-1 text-lg ml-2">🗑</button>
@@ -360,67 +400,78 @@
     }
 
     function buildTotalsFooter() {
-        let seTotal = 0, meTotal = 0, nightTotal = 0, xcTotal = 0, instTotal = 0;
-        let seDayPic = 0, seDayDual = 0, meDayPic = 0, meDayDual = 0, xcDayPic = 0;
-        let actualIMC = 0, hood = 0, ftd = 0;
+        let seDayPic = 0, seDayDual = 0, seNightPic = 0, seNightDual = 0, seCo = 0;
+        let meDayPic = 0, meDayDual = 0, meNightPic = 0, meNightDual = 0, meCo = 0;
+        let xcDayPic = 0, xcDayDual = 0, xcNightPic = 0, xcNightDual = 0;
+        let actualIMC = 0, hood = 0, ftd = 0, ifrAppr = 0;
+        let nightLandings = 0;
+        let grandTotal = 0;
 
         flights.forEach(f => {
             seDayPic += parseFloat(f.seDayPic || 0);
             seDayDual += parseFloat(f.seDayDual || 0);
+            seNightPic += parseFloat(f.seNightPic || 0);
+            seNightDual += parseFloat(f.seNightDual || 0);
+            seCo += parseFloat(f.seCo || 0);
+
             meDayPic += parseFloat(f.meDayPic || 0);
             meDayDual += parseFloat(f.meDayDual || 0);
+            meNightPic += parseFloat(f.meNightPic || 0);
+            meNightDual += parseFloat(f.meNightDual || 0);
+            meCo += parseFloat(f.meCo || 0);
+
             xcDayPic += parseFloat(f.xcDayPic || 0);
+            xcDayDual += parseFloat(f.xcDayDual || 0);
+            xcNightPic += parseFloat(f.xcNightPic || 0);
+            xcNightDual += parseFloat(f.xcNightDual || 0);
+
             actualIMC += parseFloat(f.actualIMC || 0);
             hood += parseFloat(f.hood || 0);
             ftd += parseFloat(f.ftd || 0);
+            ifrAppr += parseFloat(f.ifrAppr || 0);
 
-            seTotal += parseFloat(f.seDayPic || 0) + parseFloat(f.seDayDual || 0) + parseFloat(f.seNightPic || 0) + parseFloat(f.seNightDual || 0) + parseFloat(f.seCo || 0);
-            meTotal += parseFloat(f.meDayPic || 0) + parseFloat(f.meDayDual || 0) + parseFloat(f.meNightPic || 0) + parseFloat(f.meNightDual || 0) + parseFloat(f.meCo || 0);
-            nightTotal += parseFloat(f.seNightPic || 0) + parseFloat(f.seNightDual || 0) + parseFloat(f.meNightPic || 0) + parseFloat(f.meNightDual || 0);
-            xcTotal += parseFloat(f.xcDayPic || 0) + parseFloat(f.xcDayDual || 0) + parseFloat(f.xcNightPic || 0) + parseFloat(f.xcNightDual || 0);
-            instTotal += parseFloat(f.actualIMC || 0) + parseFloat(f.hood || 0) + parseFloat(f.ftd || 0) + parseFloat(f.ifrAppr || 0);
+            nightLandings += parseInt(f.nightLandings || 0);
+
+            grandTotal += parseFloat(f.seDayPic || 0) + parseFloat(f.seDayDual || 0) + parseFloat(f.seNightPic || 0) + parseFloat(f.seNightDual || 0) + parseFloat(f.seCo || 0) +
+                          parseFloat(f.meDayPic || 0) + parseFloat(f.meDayDual || 0) + parseFloat(f.meNightPic || 0) + parseFloat(f.meNightDual || 0) + parseFloat(f.meCo || 0);
         });
 
-        document.getElementById('grand-total-time').textContent = (seTotal + meTotal).toFixed(1);
-        document.getElementById('se-total').textContent = seTotal.toFixed(1);
-        document.getElementById('me-total').textContent = meTotal.toFixed(1);
-        document.getElementById('night-total').textContent = nightTotal.toFixed(1);
-        document.getElementById('xc-total').textContent = xcTotal.toFixed(1);
-        document.getElementById('inst-total').textContent = instTotal.toFixed(1);
-
         document.getElementById('totals-grid').innerHTML = `
-            <div>SE Day PIC: <span class="font-semibold">${seDayPic.toFixed(1)}</span></div>
-            <div>SE Day Dual: <span class="font-semibold">${seDayDual.toFixed(1)}</span></div>
-            <div>ME Day PIC: <span class="font-semibold">${meDayPic.toFixed(1)}</span></div>
-            <div>ME Day Dual: <span class="font-semibold">${meDayDual.toFixed(1)}</span></div>
-            <div>XC Day PIC: <span class="font-semibold">${xcDayPic.toFixed(1)}</span></div>
-            <div>Actual IMC: <span class="font-semibold">${actualIMC.toFixed(1)}</span></div>
-            <div>Hood: <span class="font-semibold">${hood.toFixed(1)}</span></div>
-            <div>FTD: <span class="font-semibold">${ftd.toFixed(1)}</span></div>
+            <div><strong>SE Day PIC:</strong> ${seDayPic.toFixed(1)}</div>
+            <div><strong>SE Day Dual:</strong> ${seDayDual.toFixed(1)}</div>
+            <div><strong>ME Day PIC:</strong> ${meDayPic.toFixed(1)}</div>
+            <div><strong>ME Day Dual:</strong> ${meDayDual.toFixed(1)}</div>
+            <div><strong>XC Day PIC:</strong> ${xcDayPic.toFixed(1)}</div>
+            <div><strong>XC Day Dual:</strong> ${xcDayDual.toFixed(1)}</div>
+            <div><strong>Actual IMC:</strong> ${actualIMC.toFixed(1)}</div>
+            <div><strong>Hood:</strong> ${hood.toFixed(1)}</div>
+            <div><strong>FTD:</strong> ${ftd.toFixed(1)}</div>
         `;
+
+        document.getElementById('grand-total-time').textContent = grandTotal.toFixed(1);
 
         document.getElementById('logbook-tfoot').innerHTML = `
             <tr class="bg-slate-100 font-semibold border-t-4 border-[#0a2540]">
                 <td colspan="5" class="text-left pl-8">TOTALS →</td>
                 <td>${seDayPic.toFixed(1)}</td>
                 <td>${seDayDual.toFixed(1)}</td>
-                <td>0.0</td>
-                <td>0.0</td>
-                <td>0.0</td>
+                <td>${seNightPic.toFixed(1)}</td>
+                <td>${seNightDual.toFixed(1)}</td>
+                <td>${seCo.toFixed(1)}</td>
                 <td>${meDayPic.toFixed(1)}</td>
                 <td>${meDayDual.toFixed(1)}</td>
-                <td>0.0</td>
-                <td>0.0</td>
-                <td>0.0</td>
+                <td>${meNightPic.toFixed(1)}</td>
+                <td>${meNightDual.toFixed(1)}</td>
+                <td>${meCo.toFixed(1)}</td>
                 <td>${xcDayPic.toFixed(1)}</td>
-                <td>0.0</td>
-                <td>0.0</td>
-                <td>0.0</td>
+                <td>${xcDayDual.toFixed(1)}</td>
+                <td>${xcNightPic.toFixed(1)}</td>
+                <td>${xcNightDual.toFixed(1)}</td>
                 <td>${actualIMC.toFixed(1)}</td>
                 <td>${hood.toFixed(1)}</td>
                 <td>${ftd.toFixed(1)}</td>
-                <td>0.0</td>
-                <td>0</td>
+                <td>${ifrAppr.toFixed(1)}</td>
+                <td>${nightLandings}</td>
                 <td></td>
                 <td class="no-print"></td>
             </tr>`;
@@ -485,19 +536,15 @@
         document.getElementById('modal').classList.remove('hidden');
     }
 
-    async function deleteFlight(id) {
-        if (!confirm("Delete this flight permanently?")) return;
-        try {
-            await db.collection("flights").doc(id).delete();
-            flights = flights.filter(f => f.id !== id);
-            updateAllTotals();
-            showToast("Flight deleted");
-        } catch (e) {
-            showToast("Failed to delete", "error");
-        }
+    function deleteFlight(id) {
+        if (!confirm("Delete this flight?")) return;
+        flights = flights.filter(f => f.id !== id);
+        updateAllTotals();
+        saveData();
+        showToast("Flight deleted");
     }
 
-    async function handleFormSubmit(e) {
+    function handleFormSubmit(e) {
         e.preventDefault();
         const saveBtn = document.getElementById('save-btn');
         const originalText = saveBtn.textContent;
@@ -537,28 +584,23 @@
             ifrAppr: parseFloat(document.getElementById('form-ifr-appr').value) || 0,
 
             nightLandings: parseInt(document.getElementById('form-nightland').value) || 0,
-            remarks: document.getElementById('form-remarks').value.trim()
+            remarks: document.getElementById('form-remarks').value.trim(),
+            id: editId || Date.now().toString()
         };
 
-        try {
-            if (editId) {
-                await db.collection("flights").doc(editId).update(flightData);
-                const idx = flights.findIndex(f => f.id === editId);
-                if (idx > -1) flights[idx] = { id: editId, ...flightData };
-            } else {
-                const docRef = await db.collection("flights").add(flightData);
-                flights.push({ id: docRef.id, ...flightData });
-            }
-            updateAllTotals();
-            hideModal();
-            showToast(editId ? "Flight updated" : "New flight saved");
-        } catch (e) {
-            console.error(e);
-            showToast("Failed to save", "error");
-        } finally {
-            saveBtn.textContent = originalText;
-            saveBtn.disabled = false;
+        if (editId) {
+            const idx = flights.findIndex(f => f.id === editId);
+            if (idx > -1) flights[idx] = flightData;
+        } else {
+            flights.push(flightData);
         }
+
+        updateAllTotals();
+        saveData();   // Saves to local + Firebase
+        hideModal();
+        showToast(editId ? "Flight updated" : "New flight saved");
+        saveBtn.textContent = originalText;
+        saveBtn.disabled = false;
     }
 
     function exportToPDF() {
@@ -573,35 +615,27 @@
             margin: [0.35, 0.25, 0.45, 0.25],
             filename: `Canadian_Pilot_Logbook_${new Date().toISOString().slice(0,10)}.pdf`,
             image: { type: 'jpeg', quality: 0.92 },
-            html2canvas: { 
-                scale: 1.5,
-                useCORS: true,
-                letterRendering: true,
-                scrollY: 0,
-                height: element.scrollHeight + 700
-            },
-            jsPDF: { 
-                unit: 'in', 
-                format: 'a3', 
-                orientation: 'landscape' 
-            },
+            html2canvas: { scale: 1.5, useCORS: true, letterRendering: true, scrollY: 0, height: element.scrollHeight + 700 },
+            jsPDF: { unit: 'in', format: 'a3', orientation: 'landscape' },
             pagebreak: { mode: ['css', 'legacy'] }
         };
 
         html2pdf().set(opt).from(element).save().then(() => {
             wrapper.style.maxHeight = originalMaxHeight;
             element.style.height = '';
-            showToast(`PDF exported (${flights.length} flights)`);
-        }).catch(err => {
-            console.error(err);
-            wrapper.style.maxHeight = originalMaxHeight;
-            element.style.height = '';
-            showToast("PDF export failed", "error");
         });
     }
 
+    function showToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-6 right-6 px-6 py-3 rounded-2xl text-white shadow-2xl z-50 bg-emerald-600';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2500);
+    }
+
     window.onload = () => {
-        loadFromFirebase();
+        loadData();
     };
 </script>
 </body>
