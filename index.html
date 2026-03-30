@@ -63,21 +63,22 @@
         </button>
     </div>
 
-    <!-- Toolbar + 98% Copied Header -->
+    <!-- Toolbar -->
     <div class="bg-white border-b px-6 py-4 sticky top-0 z-20">
         <div class="flex items-center justify-between mb-4">
             <button onclick="showAddModal()" class="flex items-center gap-x-2 bg-[#0a2540] text-white px-8 py-4 rounded-3xl font-semibold hover:bg-sky-700">
                 <span class="text-2xl">+</span> ADD NEW FLIGHT
             </button>
             <div class="flex gap-4">
-                <button onclick="downloadLocalFile()" class="px-5 py-2 border border-slate-300 rounded-2xl text-sm hover:bg-slate-50">💾 Download Data File</button>
-                <button onclick="forceSyncFromFirebase()" class="px-5 py-2 border border-emerald-400 text-emerald-600 rounded-2xl text-sm hover:bg-emerald-50">🔄 Sync Cloud</button>
+                <button onclick="downloadLocalFile()" class="px-5 py-2 border border-slate-300 rounded-2xl text-sm hover:bg-slate-50">💾 Download JSON</button>
+                <button onclick="forceSyncFromFirebase()" class="px-5 py-2 border border-emerald-400 text-emerald-600 rounded-2xl text-sm hover:bg-emerald-50">🔄 Sync from Cloud</button>
             </div>
             <div class="text-sm text-slate-500">
                 <span id="entry-count">0 entries</span>
             </div>
         </div>
 
+        <!-- 98% Copied Header -->
         <div class="copied-header-container overflow-x-auto">
             <table class="logbook-table w-full">
                 <thead>
@@ -161,7 +162,7 @@
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Full Modal -->
 <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto">
         <div class="px-8 py-6 border-b sticky top-0 bg-white z-10 flex justify-between">
@@ -218,7 +219,7 @@
                 </div>
             </div>
 
-            <!-- Multi-Engine -->
+            <!-- Multi-Engine, X-Country, Instrument, Night Landings, Remarks - full fields -->
             <div class="col-span-12">
                 <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">MULTI-ENGINE</div>
                 <div class="grid grid-cols-5 gap-4">
@@ -230,7 +231,6 @@
                 </div>
             </div>
 
-            <!-- X-Country -->
             <div class="col-span-12">
                 <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">X-COUNTRY</div>
                 <div class="grid grid-cols-2 gap-8">
@@ -251,7 +251,6 @@
                 </div>
             </div>
 
-            <!-- Instrument Time -->
             <div class="col-span-12">
                 <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">INSTRUMENT TIME</div>
                 <div class="grid grid-cols-4 gap-4">
@@ -296,42 +295,32 @@
     let flights = [];
     let editId = null;
 
-    // SYNCHRONIZE LOCAL + CLOUD (exactly as you asked)
+    // Clean & Reliable Load - Firebase first, then merge local
     async function loadData() {
-        flights = [];   // Clear first
+        flights = [];
 
-        // 1. Load from local computer
-        const localData = localStorage.getItem('canadianPilotLogbook');
-        let localFlights = localData ? JSON.parse(localData) : [];
-
-        // 2. Load from cloud
-        let cloudFlights = [];
+        // 1. Load from Firebase (this ensures iPad sees everything you added from computer)
         try {
             const snapshot = await db.collection('flights').get();
             snapshot.forEach(doc => {
-                cloudFlights.push(doc.data());
+                flights.push(doc.data());
             });
         } catch (e) {
-            console.log("Offline - using local only");
+            console.log("Firebase not reachable");
         }
 
-        // 3. Merge: make sure both sources accomplish each other (union by ID)
-        const mergedMap = new Map();
+        // 2. Merge with localStorage (keep any offline changes from this device)
+        const localData = localStorage.getItem('canadianPilotLogbook');
+        if (localData) {
+            const localFlights = JSON.parse(localData);
+            const map = new Map(flights.map(f => [f.id, f]));
 
-        // Add all local flights
-        localFlights.forEach(f => {
-            mergedMap.set(f.id, f);
-        });
+            localFlights.forEach(f => {
+                map.set(f.id, f);   // Local wins if conflict
+            });
 
-        // Add any cloud flights that are missing locally
-        cloudFlights.forEach(f => {
-            if (!mergedMap.has(f.id)) {
-                mergedMap.set(f.id, f);
-            }
-        });
-
-        // Convert back to array
-        flights = Array.from(mergedMap.values());
+            flights = Array.from(map.values());
+        }
 
         // Save merged result back to localStorage
         localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
@@ -342,7 +331,7 @@
     function saveData() {
         localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
 
-        // Auto-download JSON to computer
+        // Auto download JSON
         const dataStr = JSON.stringify(flights, null, 2);
         const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
         const link = document.createElement('a');
@@ -366,13 +355,13 @@
     }
 
     async function forceSyncFromFirebase() {
-        if (confirm("Force sync from cloud? This will merge with your local data.")) {
+        if (confirm("Sync all data from cloud?")) {
             await loadData();
             showToast("Synced from cloud");
         }
     }
 
-    // ==================== All other functions (unchanged) ====================
+    // ==================== Standard functions ====================
     function parseCustomDate(dateStr) {
         if (!dateStr) return new Date(0);
         let cleaned = dateStr.toLowerCase().replace(/\.+/g, '.').trim();
