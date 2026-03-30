@@ -18,33 +18,30 @@ let editId = null;
 // → paste all your existing functions here from the previous full code
 
 function buildTotalsFooter() {
-    console.log("🔄 buildTotalsFooter running with", flights.length, "flights");
+    console.log("🔄 buildTotalsFooter called");
+
+    const banner = document.getElementById('debug-banner');
+    if (banner) {
+        banner.style.background = '#ecfdf5';
+        banner.style.color = '#10b981';
+        banner.style.borderColor = '#10b981';
+        banner.innerHTML = '✅ Totals system is running - XC Day Dual should appear below';
+    }
 
     let xcDayDual = 0;
     flights.forEach(f => {
         xcDayDual += parseFloat(f.xcDayDual || 0);
     });
 
-    // Force a very visible test
-    const grid = document.getElementById('totals-grid');
-    if (grid) {
-        grid.innerHTML = `
-            <div style="background:#fef3c7; padding:16px; border:3px solid #f59e0b; border-radius:12px; font-size:15px;">
-                <strong>XC Day Dual Test:</strong> ${xcDayDual.toFixed(1)}
-            </div>
-            <div style="margin-top:12px; color:#0a2540;">
-                If you see this yellow box, the totals system is working.
-            </div>
-        `;
-        console.log("✅ Grid updated with yellow box - XC Day Dual =", xcDayDual.toFixed(1));
-    } else {
-        console.error("❌ totals-grid element not found!");
-    }
-
-    // Also update grand total
-    document.getElementById('grand-total-time').textContent = "0.0";
+    document.getElementById('totals-grid').innerHTML = `
+        <div style="background:#fef3c7; padding:16px; border:3px solid #f59e0b; border-radius:12px; font-size:15px;">
+            <strong>XC Day Dual:</strong> ${xcDayDual.toFixed(1)}
+        </div>
+        <div style="margin-top:12px; color:#0a2540; font-weight:600;">
+            If you see this yellow box, the totals are working.
+        </div>
+    `;
 }
-
 
     function updateAllTotals() {
         renderTable();
