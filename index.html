@@ -52,7 +52,7 @@
         </button>
     </div>
 
-    <!-- Toolbar + Second main section heading -->
+    <!-- Toolbar -->
     <div class="bg-white border-b px-6 py-4 sticky top-0 z-20">
         <div class="flex items-center justify-between mb-4">
             <button onclick="showAddModal()" class="flex items-center gap-x-2 bg-[#0a2540] text-white px-8 py-4 rounded-3xl font-semibold hover:bg-sky-700">
@@ -68,7 +68,7 @@
             </div>
         </div>
 
-        <!-- Second copied header (98% width) -->
+        <!-- Second copied header -->
         <div class="copied-header-container overflow-x-auto">
             <table class="logbook-table w-full">
                 <thead>
@@ -133,7 +133,6 @@
                 </table>
             </div>
 
-            <!-- COLUMN TOTALS SUMMARY -->
             <div class="bg-slate-50 border-t-2 border-[#0a2540] px-8 py-8">
                 <div class="text-[#0a2540] font-medium mb-4 text-lg">COLUMN TOTALS SUMMARY</div>
                 <div id="totals-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-x-8 gap-y-4 text-sm"></div>
@@ -206,7 +205,7 @@
                 </div>
             </div>
 
-            <!-- Multi-Engine -->
+            <!-- Multi-Engine, X-Country, Instrument, Night Landings, Remarks (same as before) -->
             <div class="col-span-12">
                 <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">MULTI-ENGINE</div>
                 <div class="grid grid-cols-5 gap-4">
@@ -218,7 +217,6 @@
                 </div>
             </div>
 
-            <!-- X-Country -->
             <div class="col-span-12">
                 <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">X-COUNTRY</div>
                 <div class="grid grid-cols-2 gap-8">
@@ -239,7 +237,6 @@
                 </div>
             </div>
 
-            <!-- Instrument Time -->
             <div class="col-span-12">
                 <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">INSTRUMENT TIME</div>
                 <div class="grid grid-cols-4 gap-4">
@@ -298,14 +295,13 @@
                     const loaded = JSON.parse(event.target.result);
                     flights = Array.isArray(loaded) ? loaded : [];
                     localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
-                    // Upload to Firebase
                     flights.forEach(f => {
                         if (f && f.id) db.collection('flights').doc(f.id).set(f).catch(() => {});
                     });
                     updateAllTotals();
                     showToast(`✅ Loaded ${flights.length} flights from your JSON file`);
                 } catch (err) {
-                    showToast("❌ Error reading JSON file. Make sure it's a valid array.", "error");
+                    showToast("❌ Error reading JSON file", "error");
                 }
             };
             reader.readAsText(file);
@@ -340,6 +336,35 @@
             }
         }
     }
+
+    // Delete flight from memory, localStorage, Firebase, and JSON
+    function deleteFlight(id) {
+        if (!confirm("Delete this flight permanently from local, JSON, and cloud?")) return;
+        
+        flights = flights.filter(f => f.id !== id);   // Remove from memory
+        updateAllTotals();                            // Refresh table immediately
+        saveData();                                   // Save to localStorage + download updated JSON + update Firebase
+        showToast("Flight deleted from local, JSON, and cloud");
+    }
+
+    function saveData() {
+        localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
+
+        // Auto-download updated JSON
+        const dataStr = JSON.stringify(flights, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+        const link = document.createElement('a');
+        link.href = dataUri;
+        link.download = 'canadianPilotLogbook.json';
+        link.click();
+
+        // Update Firebase
+        flights.forEach(f => {
+            if (f && f.id) db.collection('flights').doc(f.id).set(f).catch(() => {});
+        });
+    }
+
+    // Rest of functions (parseCustomDate, renderTable, buildTotalsFooter, showAddModal, hideModal, editFlight, handleFormSubmit, exportToPDF, showToast)
 
     function parseCustomDate(dateStr) {
         if (!dateStr) return new Date(0);
@@ -501,14 +526,6 @@
         document.getElementById('modal').classList.remove('hidden');
     }
 
-    function deleteFlight(id) {
-        if (!confirm("Delete this flight permanently?")) return;
-        flights = flights.filter(f => f.id !== id);
-        updateAllTotals();
-        saveData();
-        showToast("Flight deleted");
-    }
-
     function handleFormSubmit(e) {
         e.preventDefault();
         const saveBtn = document.getElementById('save-btn');
@@ -598,8 +615,6 @@
         if (localData) {
             flights = JSON.parse(localData);
             updateAllTotals();
-        } else {
-            loadData();
         }
     };
 </script>
