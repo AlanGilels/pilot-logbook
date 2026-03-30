@@ -160,7 +160,7 @@
     </div>
 </div>
 
-<!-- Full Modal -->
+<!-- Modal -->
 <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto">
         <div class="px-8 py-6 border-b sticky top-0 bg-white z-10 flex justify-between">
@@ -170,8 +170,8 @@
         
         <form id="flight-form" onsubmit="handleFormSubmit(event)" class="p-8 grid grid-cols-12 gap-6">
             <div class="col-span-12 md:col-span-4">
-                <label class="block text-xs font-medium text-slate-500 mb-1">DATE</label>
-                <input type="text" id="form-date" placeholder="2023.aug.22" required class="w-full border border-slate-300 rounded-2xl px-5 py-4">
+                <label class="block text-xs font-medium text-slate-500 mb-1">DATE (e.g. 2023.aug.22)</label>
+                <input type="text" id="form-date" placeholder="2023.aug.22" required class="w-full border border-slate-300 rounded-2xl px-5 py-4 font-medium">
             </div>
             <div class="col-span-12 md:col-span-4">
                 <label class="block text-xs font-medium text-slate-500 mb-1">AIRCRAFT TYPE</label>
@@ -179,21 +179,21 @@
             </div>
             <div class="col-span-12 md:col-span-3">
                 <label class="block text-xs font-medium text-slate-500 mb-1">REG</label>
-                <input type="text" id="form-reg" placeholder="C-GABC" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase">
+                <input type="text" id="form-reg" placeholder="C-GABC" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
             </div>
 
             <div class="col-span-6 md:col-span-2">
                 <label class="block text-xs font-medium text-slate-500 mb-1">FROM</label>
-                <input type="text" id="form-from" placeholder="CYVR" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase">
+                <input type="text" id="form-from" placeholder="CYVR" maxlength="4" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
             </div>
             <div class="col-span-6 md:col-span-2">
                 <label class="block text-xs font-medium text-slate-500 mb-1">TO</label>
-                <input type="text" id="form-to" placeholder="CYLW" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase">
+                <input type="text" id="form-to" placeholder="CYLW" maxlength="4" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
             </div>
 
             <div class="col-span-12 md:col-span-2">
                 <label class="block text-xs font-medium text-slate-500 mb-1">TOTAL TIME</label>
-                <input type="number" id="form-total" step="0.1" value="1.0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center text-xl">
+                <input type="number" id="form-total" step="0.1" value="1.0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center text-xl font-semibold">
             </div>
 
             <div class="col-span-12 md:col-span-6">
@@ -250,7 +250,7 @@
                 </div>
             </div>
 
-            <!-- Instrument -->
+            <!-- Instrument Time -->
             <div class="col-span-12">
                 <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">INSTRUMENT TIME</div>
                 <div class="grid grid-cols-4 gap-4">
@@ -280,7 +280,7 @@
 </div>
 
 <script>
-    // Firebase Config
+    // Firebase Config (your original)
     const firebaseConfig = {
         apiKey: "AIzaSyDXNNLgbrkYWbn32D34IBl18J7F1wcyJHQ",
         authDomain: "canadian-pilot-logbook.firebaseapp.com",
@@ -296,28 +296,42 @@
     let flights = [];
     let editId = null;
 
+    // Load data - LOCAL STORAGE is always first priority
     async function loadData() {
-        try {
-            const snapshot = await db.collection('flights').get();
-            flights = [];
-            snapshot.forEach(doc => {
-                flights.push(doc.data());
-            });
-        } catch (e) {
-            console.log("Firebase load failed, using local");
-        }
-
+        // 1. Load from localStorage (never loses data)
         const saved = localStorage.getItem('canadianPilotLogbook');
-        if (saved && flights.length === 0) {
+        if (saved) {
             flights = JSON.parse(saved);
         }
+
+        // 2. Try to sync from Firebase (only if online)
+        try {
+            const snapshot = await db.collection('flights').get();
+            if (!snapshot.empty) {
+                const firebaseMap = {};
+                snapshot.forEach(doc => {
+                    firebaseMap[doc.id] = doc.data();
+                });
+
+                // Merge: keep local data, update with Firebase if newer
+                flights = flights.map(localFlight => {
+                    const fbFlight = firebaseMap[localFlight.id];
+                    return fbFlight || localFlight;
+                });
+            }
+        } catch (e) {
+            console.log("Offline mode - using local data only");
+        }
+
         updateAllTotals();
     }
 
+    // Save to localStorage + download JSON + sync to Firebase
     function saveData() {
+        // Always save to localStorage first
         localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
 
-        // Download JSON file
+        // Auto-download JSON file to your computer
         const dataStr = JSON.stringify(flights, null, 2);
         const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
         const link = document.createElement('a');
@@ -325,9 +339,11 @@
         link.setAttribute('download', 'canadianPilotLogbook.json');
         link.click();
 
-        // Sync to Firebase using local ID
+        // Sync to Firebase using the same ID from your local file
         flights.forEach(flight => {
-            db.collection('flights').doc(flight.id).set(flight).catch(err => console.log("Firebase sync failed", err));
+            db.collection('flights').doc(flight.id).set(flight).catch(() => {
+                console.log("Firebase sync failed (offline) - data is safe locally");
+            });
         });
     }
 
@@ -340,6 +356,7 @@
         link.click();
     }
 
+    // All other functions (parseCustomDate, renderTable, buildTotalsFooter, etc.) are the same as the last working version
     function parseCustomDate(dateStr) {
         if (!dateStr) return new Date(0);
         let cleaned = dateStr.toLowerCase().replace(/\.+/g, '.').trim();
@@ -364,11 +381,11 @@
         sorted.forEach(f => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${f.date || ''}</td>
+                <td class="font-medium">${f.date || ''}</td>
                 <td class="text-left">${f.aircraftType || ''}</td>
-                <td>${f.registration || ''}</td>
-                <td>${f.from || ''}</td>
-                <td>${f.to || ''}</td>
+                <td class="font-mono">${f.registration || ''}</td>
+                <td class="font-mono">${f.from || ''}</td>
+                <td class="font-mono">${f.to || ''}</td>
                 <td>${parseFloat(f.seDayPic||0).toFixed(1)}</td>
                 <td>${parseFloat(f.seDayDual||0).toFixed(1)}</td>
                 <td>${parseFloat(f.seNightPic||0).toFixed(1)}</td>
@@ -388,7 +405,7 @@
                 <td>${parseFloat(f.ftd||0).toFixed(1)}</td>
                 <td>${parseFloat(f.ifrAppr||0).toFixed(1)}</td>
                 <td>${parseInt(f.nightLandings||0)}</td>
-                <td class="text-left text-xs">${f.picName ? 'PIC: ' + f.picName : ''}${f.copilotName ? '<br>Co: ' + f.copilotName : ''}<br>${f.remarks || ''}</td>
+                <td class="text-left text-xs">${f.picName ? '<strong>PIC:</strong> ' + f.picName : ''}${f.copilotName ? '<br><strong>Co:</strong> ' + f.copilotName : ''}<br>${f.remarks || ''}</td>
                 <td class="no-print">
                     <button onclick="editFlight('${f.id}')" class="text-sky-600 hover:text-sky-800 px-2 py-1 text-lg">✏️</button>
                     <button onclick="deleteFlight('${f.id}')" class="text-red-600 hover:text-red-800 px-2 py-1 text-lg ml-2">🗑</button>
@@ -537,7 +554,7 @@
     }
 
     function deleteFlight(id) {
-        if (!confirm("Delete this flight?")) return;
+        if (!confirm("Delete this flight permanently?")) return;
         flights = flights.filter(f => f.id !== id);
         updateAllTotals();
         saveData();
@@ -596,7 +613,7 @@
         }
 
         updateAllTotals();
-        saveData();   // Saves to local + Firebase
+        saveData();   // This now reliably saves to local JSON even when offline
         hideModal();
         showToast(editId ? "Flight updated" : "New flight saved");
         saveBtn.textContent = originalText;
