@@ -18,60 +18,23 @@ let editId = null;
 // → paste all your existing functions here from the previous full code
 
 function buildTotalsFooter() {
-    console.log("🔄 buildTotalsFooter running - flights:", flights.length);
+    console.log("🔄 buildTotalsFooter started -", flights.length, "flights");
 
-    let seDayPic = 0, seDayDual = 0, seNightPic = 0, seNightDual = 0, seCo = 0;
-    let meDayPic = 0, meDayDual = 0, meNightPic = 0, meNightDual = 0, meCo = 0;
-    let xcDayPic = 0, xcDayDual = 0, xcNightPic = 0, xcNightDual = 0;
-    let actualIMC = 0, hood = 0, ftd = 0, ifrAppr = 0;
-    let nightLandings = 0;
-    let grandTotal = 0;
+    let xcDayDual = 0;
 
     flights.forEach(f => {
-        seDayPic += parseFloat(f.seDayPic || 0);
-        seDayDual += parseFloat(f.seDayDual || 0);
-        seNightPic += parseFloat(f.seNightPic || 0);
-        seNightDual += parseFloat(f.seNightDual || 0);
-        seCo += parseFloat(f.seCo || 0);
-
-        meDayPic += parseFloat(f.meDayPic || 0);
-        meDayDual += parseFloat(f.meDayDual || 0);
-        meNightPic += parseFloat(f.meNightPic || 0);
-        meNightDual += parseFloat(f.meNightDual || 0);
-        meCo += parseFloat(f.meCo || 0);
-
-        xcDayPic += parseFloat(f.xcDayPic || 0);
         xcDayDual += parseFloat(f.xcDayDual || 0);
-        xcNightPic += parseFloat(f.xcNightPic || 0);
-        xcNightDual += parseFloat(f.xcNightDual || 0);
-
-        actualIMC += parseFloat(f.actualIMC || 0);
-        hood += parseFloat(f.hood || 0);
-        ftd += parseFloat(f.ftd || 0);
-        ifrAppr += parseFloat(f.ifrAppr || 0);
-
-        nightLandings += parseInt(f.nightLandings || 0);
-
-        grandTotal += parseFloat(f.seDayPic || 0) + parseFloat(f.seDayDual || 0) + parseFloat(f.seNightPic || 0) + parseFloat(f.seNightDual || 0) + parseFloat(f.seCo || 0) +
-                      parseFloat(f.meDayPic || 0) + parseFloat(f.meDayDual || 0) + parseFloat(f.meNightPic || 0) + parseFloat(f.meNightDual || 0) + parseFloat(f.meCo || 0);
     });
 
-    // Simple and clear grid - XC Day Dual is included
+    // Very simple test grid - only showing XC Day Dual for now
     document.getElementById('totals-grid').innerHTML = `
-        <div><strong>SE Day PIC:</strong> ${seDayPic.toFixed(1)}</div>
-        <div><strong>SE Day Dual:</strong> ${seDayDual.toFixed(1)}</div>
-        <div><strong>ME Day PIC:</strong> ${meDayPic.toFixed(1)}</div>
-        <div><strong>ME Day Dual:</strong> ${meDayDual.toFixed(1)}</div>
-        <div><strong>XC Day PIC:</strong> ${xcDayPic.toFixed(1)}</div>
-        <div><strong>XC Day Dual:</strong> ${xcDayDual.toFixed(1)}</div>
-        <div><strong>Actual IMC:</strong> ${actualIMC.toFixed(1)}</div>
-        <div><strong>Hood:</strong> ${hood.toFixed(1)}</div>
-        <div><strong>FTD:</strong> ${ftd.toFixed(1)}</div>
+        <div style="background:#fef3c7; padding:12px; border-radius:8px; border:2px solid #f59e0b;">
+            <strong>XC Day Dual:</strong> ${xcDayDual.toFixed(1)}
+        </div>
+        <div><strong>Test - Totals are working</strong></div>
     `;
 
-    document.getElementById('grand-total-time').textContent = grandTotal.toFixed(1);
-
-    console.log("✅ Totals updated - XC Day Dual =", xcDayDual.toFixed(1));
+    console.log("✅ XC Day Dual value =", xcDayDual.toFixed(1));
 }
     function updateAllTotals() {
         renderTable();
