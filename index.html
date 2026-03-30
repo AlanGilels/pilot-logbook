@@ -296,38 +296,39 @@
     let flights = [];
     let editId = null;
 
-    // Improved load logic - prevents duplication
+    // Clean load - prevents duplication
     async function loadData() {
-        flights = [];
+        flights = [];   // Clear first to avoid doubling
 
-        // Try Firebase first (for iPad and any new device)
+        // Try Firebase first (best for iPad)
         try {
             const snapshot = await db.collection('flights').get();
-            snapshot.forEach(doc => {
-                flights.push(doc.data());
-            });
+            if (!snapshot.empty) {
+                snapshot.forEach(doc => {
+                    flights.push(doc.data());
+                });
+                // Save to localStorage for offline use
+                localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
+            }
         } catch (e) {
-            console.log("Firebase not available, using local only");
+            console.log("Firebase not available");
         }
 
-        // If Firebase returned nothing, load from localStorage
+        // If Firebase was empty, load from localStorage
         if (flights.length === 0) {
             const saved = localStorage.getItem('canadianPilotLogbook');
             if (saved) {
                 flights = JSON.parse(saved);
             }
-        } else {
-            // Save Firebase data to localStorage so iPad has it offline
-            localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
         }
 
         updateAllTotals();
     }
 
     function saveData() {
-        // Save to localStorage + download JSON
         localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
 
+        // Auto download JSON
         const dataStr = JSON.stringify(flights, null, 2);
         const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
         const link = document.createElement('a');
@@ -357,7 +358,6 @@
         }
     }
 
-    // ==================== Rest of functions (unchanged) ====================
     function parseCustomDate(dateStr) {
         if (!dateStr) return new Date(0);
         let cleaned = dateStr.toLowerCase().replace(/\.+/g, '.').trim();
