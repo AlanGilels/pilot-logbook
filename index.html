@@ -52,7 +52,7 @@
         </button>
     </div>
 
-    <!-- Toolbar with second main header -->
+    <!-- Toolbar + Second main section heading (copied header) -->
     <div class="bg-white border-b px-6 py-4 sticky top-0 z-20">
         <div class="flex items-center justify-between mb-4">
             <button onclick="showAddModal()" class="flex items-center gap-x-2 bg-[#0a2540] text-white px-8 py-4 rounded-3xl font-semibold hover:bg-sky-700">
@@ -67,7 +67,7 @@
             </div>
         </div>
 
-        <!-- Second main section heading (98% width copied header) -->
+        <!-- Second copied header -->
         <div class="copied-header-container overflow-x-auto">
             <table class="logbook-table w-full">
                 <thead>
@@ -148,7 +148,7 @@
     </div>
 </div>
 
-<!-- Full Modal -->
+<!-- Modal (full) -->
 <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto">
         <div class="px-8 py-6 border-b sticky top-0 bg-white z-10 flex justify-between">
@@ -157,6 +157,7 @@
         </div>
         
         <form id="flight-form" onsubmit="handleFormSubmit(event)" class="p-8 grid grid-cols-12 gap-6">
+            <!-- Form fields (full) -->
             <div class="col-span-12 md:col-span-4">
                 <label class="block text-xs font-medium text-slate-500 mb-1">DATE (e.g. 2023.aug.22)</label>
                 <input type="text" id="form-date" placeholder="2023.aug.22" required class="w-full border border-slate-300 rounded-2xl px-5 py-4 font-medium">
@@ -205,8 +206,59 @@
                 </div>
             </div>
 
-            <!-- Multi-Engine, X-Country, Instrument, Night Landings, Remarks fields are the same as before -->
-            <!-- (Full fields are included in the actual code you copy) -->
+            <!-- Multi-Engine -->
+            <div class="col-span-12">
+                <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">MULTI-ENGINE</div>
+                <div class="grid grid-cols-5 gap-4">
+                    <div><label class="block text-xs text-slate-500 mb-1">Day PIC</label><input type="number" id="form-me-day-pic" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Day Dual</label><input type="number" id="form-me-day-dual" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Night PIC</label><input type="number" id="form-me-night-pic" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Night Dual</label><input type="number" id="form-me-night-dual" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Co-Pilot</label><input type="number" id="form-me-co" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                </div>
+            </div>
+
+            <!-- X-Country -->
+            <div class="col-span-12">
+                <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">X-COUNTRY</div>
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <div class="text-center text-xs font-medium text-slate-500 mb-2">DAY</div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs text-slate-500 mb-1">PIC</label><input type="number" id="form-xc-day-pic" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                            <div><label class="block text-xs text-slate-500 mb-1">Dual</label><input type="number" id="form-xc-day-dual" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-center text-xs font-medium text-slate-500 mb-2">NIGHT</div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs text-slate-500 mb-1">PIC</label><input type="number" id="form-xc-night-pic" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                            <div><label class="block text-xs text-slate-500 mb-1">Dual</label><input type="number" id="form-xc-night-dual" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instrument Time -->
+            <div class="col-span-12">
+                <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">INSTRUMENT TIME</div>
+                <div class="grid grid-cols-4 gap-4">
+                    <div><label class="block text-xs text-slate-500 mb-1">Actual IMC</label><input type="number" id="form-actual-imc" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">Hood</label><input type="number" id="form-hood" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">FTD</label><input type="number" id="form-ftd" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                    <div><label class="block text-xs text-slate-500 mb-1">IFR Appr</label><input type="number" id="form-ifr-appr" step="0.1" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4 text-center"></div>
+                </div>
+            </div>
+
+            <div class="col-span-12">
+                <label class="block text-xs font-medium text-slate-500 mb-1">NIGHT LANDINGS</label>
+                <input type="number" id="form-nightland" value="0" class="w-full border border-slate-300 rounded-2xl px-5 py-4">
+            </div>
+
+            <div class="col-span-12">
+                <label class="block text-xs font-medium text-slate-500 mb-1">REMARKS</label>
+                <textarea id="form-remarks" rows="3" class="w-full border border-slate-300 rounded-3xl px-5 py-4" placeholder="Notes..."></textarea>
+            </div>
 
             <div class="col-span-12 flex gap-3 pt-8">
                 <button type="button" onclick="hideModal()" class="flex-1 py-5 border border-slate-300 rounded-3xl hover:bg-slate-100">CANCEL</button>
@@ -232,17 +284,14 @@
     let flights = [];
     let editId = null;
 
-    // Simple merge - no auto ID creation that causes doubling
     async function loadData() {
         flights = [];
 
-        // Load local first
         const localData = localStorage.getItem('canadianPilotLogbook');
         if (localData) {
             flights = JSON.parse(localData);
         }
 
-        // Add missing flights from cloud without creating new IDs
         try {
             const snapshot = await db.collection('flights').get();
             const cloudFlights = [];
@@ -259,10 +308,8 @@
             console.log("Cloud not reachable");
         }
 
-        // Save merged list
         localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
 
-        // Upload to cloud
         flights.forEach(f => {
             if (f.id) db.collection('flights').doc(f.id).set(f).catch(() => {});
         });
@@ -286,9 +333,9 @@
     }
 
     async function forceFullSync() {
-        if (confirm("Force full sync? This will merge local and cloud flights without creating duplicates.")) {
+        if (confirm("Force full sync?")) {
             await loadData();
-            showToast("✅ Sync complete. No new duplicate IDs created.");
+            showToast("✅ Sync complete");
         }
     }
 
@@ -296,6 +343,8 @@
         saveData();
         showToast("JSON downloaded");
     }
+
+    // parseCustomDate, sortFlightsByDate, renderTable, buildTotalsFooter, updateAllTotals, showAddModal, hideModal, editFlight, deleteFlight, handleFormSubmit, exportToPDF, showToast remain the same as the clean version
 
     function parseCustomDate(dateStr) {
         if (!dateStr) return new Date(0);
@@ -425,7 +474,6 @@
         editId = id;
         document.getElementById('modal-title').textContent = 'Edit Flight';
 
-        // Populate all form fields (same as before)
         document.getElementById('form-date').value = flight.date || '';
         document.getElementById('form-type').value = flight.aircraftType || '';
         document.getElementById('form-reg').value = flight.registration || '';
@@ -502,7 +550,7 @@
             ifrAppr: parseFloat(document.getElementById('form-ifr-appr').value) || 0,
             nightLandings: parseInt(document.getElementById('form-nightland').value) || 0,
             remarks: document.getElementById('form-remarks').value.trim(),
-            id: editId || Date.now().toString()   // original simple ID
+            id: editId || Date.now().toString()
         };
 
         if (editId) {
