@@ -39,7 +39,7 @@ function buildTotalsFooter() {
         meCo += parseFloat(f.meCo || 0);
 
         xcDayPic += parseFloat(f.xcDayPic || 0);
-        xcDayDual += parseFloat(f.xcDayDual || 0);   // ← XC Day Dual added
+        xcDayDual += parseFloat(f.xcDayDual || 0);   // ← Added XC Day Dual
         xcNightPic += parseFloat(f.xcNightPic || 0);
         xcNightDual += parseFloat(f.xcNightDual || 0);
 
@@ -54,6 +54,7 @@ function buildTotalsFooter() {
                       parseFloat(f.meDayPic || 0) + parseFloat(f.meDayDual || 0) + parseFloat(f.meNightPic || 0) + parseFloat(f.meNightDual || 0) + parseFloat(f.meCo || 0);
     });
 
+    // COLUMN TOTALS SUMMARY with XC Day Dual added
     document.getElementById('totals-grid').innerHTML = `
         <div><strong>SE Day PIC:</strong> ${seDayPic.toFixed(1)}</div>
         <div><strong>SE Day Dual:</strong> ${seDayDual.toFixed(1)}</div>
@@ -68,27 +69,33 @@ function buildTotalsFooter() {
 
     document.getElementById('grand-total-time').textContent = grandTotal.toFixed(1);
 
+    // Bottom TOTALS row (updated to include XC Day Dual)
     document.getElementById('logbook-tfoot').innerHTML = `
         <tr class="bg-slate-100 font-semibold border-t-4 border-[#0a2540]">
             <td colspan="5" class="text-left pl-8">TOTALS →</td>
             <td>${seDayPic.toFixed(1)}</td>
             <td>${seDayDual.toFixed(1)}</td>
-            <td>0.0</td><td>0.0</td><td>0.0</td>
+            <td>0.0</td>
+            <td>0.0</td>
+            <td>0.0</td>
             <td>${meDayPic.toFixed(1)}</td>
             <td>${meDayDual.toFixed(1)}</td>
-            <td>0.0</td><td>0.0</td><td>0.0</td>
+            <td>0.0</td>
+            <td>0.0</td>
+            <td>0.0</td>
             <td>${xcDayPic.toFixed(1)}</td>
             <td>${xcDayDual.toFixed(1)}</td>
-            <td>0.0</td><td>0.0</td>
+            <td>0.0</td>
+            <td>0.0</td>
             <td>${actualIMC.toFixed(1)}</td>
             <td>${hood.toFixed(1)}</td>
             <td>${ftd.toFixed(1)}</td>
             <td>0.0</td>
-            <td>${nightLandings}</td>
+            <td>0</td>
             <td></td>
             <td class="no-print"></td>
         </tr>`;
-    }
+}
 
     function updateAllTotals() {
         renderTable();
