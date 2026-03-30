@@ -132,27 +132,28 @@
     }
 
     function buildTotalsFooter() {
-        console.log("🔄 buildTotalsFooter called");
+    console.log("🔄 buildTotalsFooter is now running");
 
-        const banner = document.getElementById('debug-banner');
-        if (banner) {
-            banner.style.background = '#ecfdf5';
-            banner.style.color = '#10b981';
-            banner.style.borderColor = '#10b981';
-            banner.innerHTML = '✅ Totals system is running';
-        }
-
-        let xcDayDual = 0;
-        flights.forEach(f => {
-            xcDayDual += parseFloat(f.xcDayDual || 0);
-        });
-
-        document.getElementById('totals-grid').innerHTML = `
-            <div style="background:#fef3c7; padding:16px; border:3px solid #f59e0b; border-radius:12px;">
-                <strong>XC Day Dual:</strong> ${xcDayDual.toFixed(1)}
-            </div>
-        `;
+    // Force the debug banner to change color
+    const banner = document.getElementById('debug-banner');
+    if (banner) {
+        banner.style.background = '#ecfdf5';
+        banner.style.color = '#166534';
+        banner.style.borderColor = '#4ade80';
+        banner.innerHTML = '✅ buildTotalsFooter RAN SUCCESSFULLY';
     }
+
+    // Force show XC Day Dual
+    document.getElementById('totals-grid').innerHTML = `
+        <div style="background:#fef3c7; padding:20px; border:4px solid #f59e0b; border-radius:12px; font-size:16px; text-align:center;">
+            <strong>XC Day Dual Test:</strong><br>
+            <span style="font-size:24px; font-weight:bold;">${(0).toFixed(1)}</span>
+        </div>
+        <div style="margin-top:16px; color:#166534; font-weight:600;">
+            If you see this yellow box, the totals system is working.
+        </div>
+    `;
+}
 
     function updateAllTotals() {
         // renderTable() can be added later - for now just run totals
@@ -166,10 +167,10 @@
 
     // Add your other functions (editFlight, deleteFlight, handleFormSubmit, exportToPDF, etc.) here if needed
 
-    window.onload = () => {
-        console.log("🚀 Page loaded");
-        loadFromFirebase();
-    };
+   window.onload = () => {
+    console.log("🚀 Page loaded - calling loadFromFirebase");
+    loadFromFirebase();
+};
 </script>
 </body>
 </html>
