@@ -32,10 +32,14 @@
         }
         .logbook-table tr:hover { background-color: #f8fafc; }
         .table-wrapper { 
-            max-height: calc(100vh - 380px); 
+            max-height: calc(100vh - 340px); 
             overflow-y: auto; 
         }
-        .copied-header-container { width: 98%; margin-left: auto; margin-right: auto; }
+        .repeat-header {
+            background: #0a2540 !important;
+            color: white !important;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen">
@@ -69,36 +73,6 @@
             <div class="text-sm text-slate-500">
                 <span id="entry-count">0 entries</span>
             </div>
-        </div>
-
-        <!-- Second copied header -->
-        <div class="copied-header-container overflow-x-auto">
-            <table class="logbook-table w-full">
-                <thead>
-                    <tr>
-                        <th class="w-28">DATE</th>
-                        <th class="w-40">AIRCRAFT TYPE</th>
-                        <th class="w-24">REG</th>
-                        <th class="w-20">FROM</th>
-                        <th class="w-20">TO</th>
-                        <th colspan="5" class="text-center">SINGLE-ENGINE</th>
-                        <th colspan="5" class="text-center">MULTI-ENGINE</th>
-                        <th colspan="4" class="text-center">X-COUNTRY</th>
-                        <th colspan="4" class="text-center">INSTRUMENT TIME</th>
-                        <th class="w-12">NIGHT LNDG</th>
-                        <th class="text-left w-56">PIC / CO-PILOT / REMARKS</th>
-                        <th class="w-16 no-print">ACTIONS</th>
-                    </tr>
-                    <tr class="bg-slate-700 text-[10px] text-white">
-                        <th></th><th></th><th></th><th></th><th></th>
-                        <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
-                        <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
-                        <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th>
-                        <th>IMC</th><th>Hood</th><th>FTD</th><th>IFR</th>
-                        <th></th><th></th>
-                    </tr>
-                </thead>
-            </table>
         </div>
     </div>
 
@@ -209,7 +183,7 @@
                 </div>
             </div>
 
-            <!-- Multi-Engine, X-Country, Instrument, Night Landings, Remarks (same as before) -->
+            <!-- Multi-Engine -->
             <div class="col-span-12">
                 <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">MULTI-ENGINE</div>
                 <div class="grid grid-cols-5 gap-4">
@@ -221,6 +195,7 @@
                 </div>
             </div>
 
+            <!-- X-Country -->
             <div class="col-span-12">
                 <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">X-COUNTRY</div>
                 <div class="grid grid-cols-2 gap-8">
@@ -241,6 +216,7 @@
                 </div>
             </div>
 
+            <!-- Instrument Time -->
             <div class="col-span-12">
                 <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">INSTRUMENT TIME</div>
                 <div class="grid grid-cols-4 gap-4">
@@ -285,7 +261,6 @@
     let flights = [];
     let editId = null;
 
-    // Load Corrected JSON from Desktop
     function loadJsonFile() {
         const input = document.createElement('input');
         input.type = 'file';
@@ -303,9 +278,9 @@
                         if (f && f.id) db.collection('flights').doc(f.id).set(f).catch(() => {});
                     });
                     updateAllTotals();
-                    showToast(`✅ Loaded ${flights.length} flights from your JSON file`);
+                    showToast(`✅ Loaded ${flights.length} flights`);
                 } catch (err) {
-                    showToast("❌ Error reading JSON file", "error");
+                    showToast("❌ Error reading JSON", "error");
                 }
             };
             reader.readAsText(file);
@@ -323,7 +298,7 @@
     }
 
     async function forceFullSync() {
-        if (confirm("Force full sync with cloud?")) {
+        if (confirm("Force full sync?")) {
             try {
                 const snapshot = await db.collection('flights').get();
                 const cloudFlights = [];
@@ -334,7 +309,7 @@
                 });
                 localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
                 updateAllTotals();
-                showToast("✅ Cloud synced");
+                showToast("✅ Synced");
             } catch (e) {
                 showToast("Cloud not reachable");
             }
@@ -353,7 +328,6 @@
         return new Date(year, month, day);
     }
 
-    // CHANGED: Oldest at top, newest at bottom
     function sortFlightsByDate() {
         return [...flights].sort((a, b) => parseCustomDate(a.date) - parseCustomDate(b.date));
     }
@@ -363,7 +337,40 @@
         tbody.innerHTML = '';
         const sorted = sortFlightsByDate();
 
-        sorted.forEach(f => {
+        sorted.forEach((f, index) => {
+            // Insert full header every 12 entries
+            if (index > 0 && index % 12 === 0) {
+                const headerRow = document.createElement('tr');
+                headerRow.className = 'repeat-header';
+                headerRow.innerHTML = `
+                    <th class="w-28">DATE</th>
+                    <th class="w-40">AIRCRAFT TYPE</th>
+                    <th class="w-24">REG</th>
+                    <th class="w-20">FROM</th>
+                    <th class="w-20">TO</th>
+                    <th colspan="5" class="text-center">SINGLE-ENGINE</th>
+                    <th colspan="5" class="text-center">MULTI-ENGINE</th>
+                    <th colspan="4" class="text-center">X-COUNTRY</th>
+                    <th colspan="4" class="text-center">INSTRUMENT TIME</th>
+                    <th class="w-12">NIGHT LNDG</th>
+                    <th class="text-left w-56">PIC / CO-PILOT / REMARKS</th>
+                    <th class="w-16 no-print">ACTIONS</th>
+                `;
+                tbody.appendChild(headerRow);
+
+                const subHeaderRow = document.createElement('tr');
+                subHeaderRow.className = 'bg-slate-700 text-[10px] text-white';
+                subHeaderRow.innerHTML = `
+                    <th></th><th></th><th></th><th></th><th></th>
+                    <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
+                    <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
+                    <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th>
+                    <th>IMC</th><th>Hood</th><th>FTD</th><th>IFR</th>
+                    <th></th><th></th>
+                `;
+                tbody.appendChild(subHeaderRow);
+            }
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td class="font-medium">${f.date || ''}</td>
@@ -398,12 +405,13 @@
             `;
             tbody.appendChild(tr);
         });
+
         document.getElementById('entry-count').textContent = flights.length + " entries";
 
-        // Auto scroll to bottom when table is rendered
+        // Auto scroll to bottom
         setTimeout(() => {
             const wrapper = document.getElementById('table-wrapper');
-            wrapper.scrollTop = wrapper.scrollHeight;
+            if (wrapper) wrapper.scrollTop = wrapper.scrollHeight;
         }, 100);
     }
 
@@ -600,6 +608,21 @@
         setTimeout(() => toast.remove(), 2500);
     }
 
+    function saveData() {
+        localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
+        // Auto download JSON after changes
+        const dataStr = JSON.stringify(flights, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+        const link = document.createElement('a');
+        link.href = dataUri;
+        link.download = 'canadianPilotLogbook.json';
+        link.click();
+        // Sync to Firebase
+        flights.forEach(f => {
+            if (f && f.id) db.collection('flights').doc(f.id).set(f).catch(() => {});
+        });
+    }
+
     window.onload = () => {
         const localData = localStorage.getItem('canadianPilotLogbook');
         if (localData) {
@@ -607,7 +630,6 @@
         }
         updateAllTotals();
 
-        // Auto scroll to bottom after table loads
         setTimeout(() => {
             const wrapper = document.getElementById('table-wrapper');
             if (wrapper) wrapper.scrollTop = wrapper.scrollHeight;
