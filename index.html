@@ -126,7 +126,7 @@
     </div>
 </div>
 
-<!-- Full Modal -->
+<!-- Modal -->
 <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto">
         <div class="px-8 py-6 border-b sticky top-0 bg-white z-10 flex justify-between">
@@ -338,7 +338,6 @@
         const sorted = sortFlightsByDate();
 
         sorted.forEach((f, index) => {
-            // Insert full header every 12 entries
             if (index > 0 && index % 12 === 0) {
                 const headerRow = document.createElement('tr');
                 headerRow.className = 'repeat-header';
@@ -408,7 +407,6 @@
 
         document.getElementById('entry-count').textContent = flights.length + " entries";
 
-        // Auto scroll to bottom
         setTimeout(() => {
             const wrapper = document.getElementById('table-wrapper');
             if (wrapper) wrapper.scrollTop = wrapper.scrollHeight;
@@ -517,11 +515,21 @@
     }
 
     function deleteFlight(id) {
-        if (!confirm("Delete this flight permanently?")) return;
+        if (!confirm("Delete this flight permanently from both local and Firebase?")) return;
+
+        // Delete from Firebase
+        db.collection('flights').doc(id).delete().then(() => {
+            console.log("Successfully deleted from Firebase");
+        }).catch(err => {
+            console.warn("Firebase delete failed (may be offline or already deleted)", err);
+        });
+
+        // Remove from local array
         flights = flights.filter(f => f.id !== id);
+
         updateAllTotals();
         saveData();
-        showToast("Flight deleted");
+        showToast("Flight deleted from local & cloud");
     }
 
     function handleFormSubmit(e) {
@@ -610,16 +618,20 @@
 
     function saveData() {
         localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
-        // Auto download JSON after changes
+        
+        // Auto-download JSON
         const dataStr = JSON.stringify(flights, null, 2);
         const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
         const link = document.createElement('a');
         link.href = dataUri;
         link.download = 'canadianPilotLogbook.json';
         link.click();
+
         // Sync to Firebase
         flights.forEach(f => {
-            if (f && f.id) db.collection('flights').doc(f.id).set(f).catch(() => {});
+            if (f && f.id) {
+                db.collection('flights').doc(f.id).set(f, { merge: true }).catch(() => {});
+            }
         });
     }
 
