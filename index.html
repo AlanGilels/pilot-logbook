@@ -31,7 +31,10 @@
             text-align: center;
         }
         .logbook-table tr:hover { background-color: #f8fafc; }
-        .table-wrapper { max-height: calc(100vh - 380px); overflow-y: auto; }
+        .table-wrapper { 
+            max-height: calc(100vh - 380px); 
+            overflow-y: auto; 
+        }
         .copied-header-container { width: 98%; margin-left: auto; margin-right: auto; }
     </style>
 </head>
@@ -133,6 +136,7 @@
                 </table>
             </div>
 
+            <!-- COLUMN TOTALS SUMMARY -->
             <div class="bg-slate-50 border-t-2 border-[#0a2540] px-8 py-8">
                 <div class="text-[#0a2540] font-medium mb-4 text-lg">COLUMN TOTALS SUMMARY</div>
                 <div id="totals-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-x-8 gap-y-4 text-sm"></div>
@@ -337,35 +341,6 @@
         }
     }
 
-    // Delete flight from memory, localStorage, Firebase, and JSON
-    function deleteFlight(id) {
-        if (!confirm("Delete this flight permanently from local, JSON, and cloud?")) return;
-        
-        flights = flights.filter(f => f.id !== id);   // Remove from memory
-        updateAllTotals();                            // Refresh table immediately
-        saveData();                                   // Save to localStorage + download updated JSON + update Firebase
-        showToast("Flight deleted from local, JSON, and cloud");
-    }
-
-    function saveData() {
-        localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
-
-        // Auto-download updated JSON
-        const dataStr = JSON.stringify(flights, null, 2);
-        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-        const link = document.createElement('a');
-        link.href = dataUri;
-        link.download = 'canadianPilotLogbook.json';
-        link.click();
-
-        // Update Firebase
-        flights.forEach(f => {
-            if (f && f.id) db.collection('flights').doc(f.id).set(f).catch(() => {});
-        });
-    }
-
-    // Rest of functions (parseCustomDate, renderTable, buildTotalsFooter, showAddModal, hideModal, editFlight, handleFormSubmit, exportToPDF, showToast)
-
     function parseCustomDate(dateStr) {
         if (!dateStr) return new Date(0);
         let cleaned = dateStr.toLowerCase().replace(/\.+/g, '.').trim();
@@ -378,8 +353,9 @@
         return new Date(year, month, day);
     }
 
+    // CHANGED: Oldest at top, newest at bottom
     function sortFlightsByDate() {
-        return [...flights].sort((a, b) => parseCustomDate(b.date) - parseCustomDate(a.date));
+        return [...flights].sort((a, b) => parseCustomDate(a.date) - parseCustomDate(b.date));
     }
 
     function renderTable() {
@@ -423,6 +399,12 @@
             tbody.appendChild(tr);
         });
         document.getElementById('entry-count').textContent = flights.length + " entries";
+
+        // Auto scroll to bottom when table is rendered
+        setTimeout(() => {
+            const wrapper = document.getElementById('table-wrapper');
+            wrapper.scrollTop = wrapper.scrollHeight;
+        }, 100);
     }
 
     function buildTotalsFooter() {
@@ -526,6 +508,14 @@
         document.getElementById('modal').classList.remove('hidden');
     }
 
+    function deleteFlight(id) {
+        if (!confirm("Delete this flight permanently?")) return;
+        flights = flights.filter(f => f.id !== id);
+        updateAllTotals();
+        saveData();
+        showToast("Flight deleted");
+    }
+
     function handleFormSubmit(e) {
         e.preventDefault();
         const saveBtn = document.getElementById('save-btn');
@@ -614,8 +604,14 @@
         const localData = localStorage.getItem('canadianPilotLogbook');
         if (localData) {
             flights = JSON.parse(localData);
-            updateAllTotals();
         }
+        updateAllTotals();
+
+        // Auto scroll to bottom after table loads
+        setTimeout(() => {
+            const wrapper = document.getElementById('table-wrapper');
+            if (wrapper) wrapper.scrollTop = wrapper.scrollHeight;
+        }, 300);
     };
 </script>
 </body>
