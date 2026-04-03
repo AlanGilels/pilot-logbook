@@ -8,7 +8,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500&display=swap');
@@ -32,14 +31,21 @@
             text-align: center;
         }
         .logbook-table tr:hover { background-color: #f8fafc; }
-        .table-wrapper { max-height: calc(100vh - 340px); overflow-y: auto; }
-        .repeat-header { background: #0a2540 !important; color: white !important; font-weight: 600; }
-        .photo-thumb { max-height: 520px; width: 100%; object-fit: contain; border-radius: 12px; }
+        .table-wrapper { 
+            max-height: calc(100vh - 340px); 
+            overflow-y: auto; 
+        }
+        .repeat-header {
+            background: #0a2540 !important;
+            color: white !important;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen">
 
 <div class="max-w-screen-2xl mx-auto">
+    <!-- Top Header -->
     <div class="bg-[#0a2540] text-white px-6 py-5 flex justify-between items-center shadow-lg">
         <div class="flex items-center gap-x-4">
             <div class="w-10 h-10 bg-white rounded-2xl flex items-center justify-center text-3xl">✈️</div>
@@ -48,23 +54,29 @@
                 <p class="text-sky-300 text-xs tracking-widest">TRANSPORT CANADA • CARs COMPLIANT</p>
             </div>
         </div>
-        <button onclick="exportToPDF()" class="bg-white text-[#0a2540] px-6 py-3 rounded-2xl font-semibold hover:bg-amber-400">📄 EXPORT PDF</button>
+        <button onclick="exportToPDF()" class="bg-white text-[#0a2540] px-6 py-3 rounded-2xl font-semibold hover:bg-amber-400 transition-colors text-sm">
+            📄 EXPORT PDF (A3 - FULL TABLE)
+        </button>
     </div>
 
+    <!-- Toolbar -->
     <div class="bg-white border-b px-6 py-4 sticky top-0 z-20">
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between mb-4">
             <button onclick="showAddModal()" class="flex items-center gap-x-2 bg-[#0a2540] text-white px-8 py-4 rounded-3xl font-semibold hover:bg-sky-700">
                 <span class="text-2xl">+</span> ADD NEW FLIGHT
             </button>
-            <div class="flex gap-3">
-                <button onclick="loadJsonFile()" class="px-6 py-3 border border-blue-500 text-blue-600 rounded-3xl text-sm">📂 Load JSON</button>
-                <button onclick="downloadLocalFile()" class="px-6 py-3 border border-slate-300 rounded-3xl text-sm">💾 Download JSON</button>
-                <button onclick="forceFullSync()" class="px-6 py-3 bg-emerald-600 text-white rounded-3xl text-sm">🔄 FORCE SYNC</button>
+            <div class="flex items-center gap-x-4">
+                <button onclick="loadJsonFile()" class="px-6 py-3 border border-blue-500 text-blue-600 rounded-3xl text-sm hover:bg-blue-50">📂 Load Corrected JSON from Desktop</button>
+                <button onclick="downloadLocalFile()" class="px-6 py-3 border border-slate-300 rounded-3xl text-sm hover:bg-slate-50">💾 Download Current JSON</button>
+                <button onclick="forceFullSync()" class="px-6 py-3 bg-emerald-600 text-white rounded-3xl text-sm hover:bg-emerald-700">🔄 FORCE FULL SYNC</button>
             </div>
-            <div id="entry-count" class="text-sm text-slate-500">0 entries</div>
+            <div class="text-sm text-slate-500">
+                <span id="entry-count">0 entries</span>
+            </div>
         </div>
     </div>
 
+    <!-- Main Table -->
     <div class="px-6 pb-8">
         <div id="logbook-content" class="bg-white rounded-3xl shadow-xl overflow-hidden">
             <div class="table-wrapper overflow-x-auto" id="table-wrapper">
@@ -98,13 +110,14 @@
                 </table>
             </div>
 
+            <!-- COLUMN TOTALS SUMMARY -->
             <div class="bg-slate-50 border-t-2 border-[#0a2540] px-8 py-8">
                 <div class="text-[#0a2540] font-medium mb-4 text-lg">COLUMN TOTALS SUMMARY</div>
                 <div id="totals-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-x-8 gap-y-4 text-sm"></div>
                 <div class="mt-8 pt-6 border-t flex justify-between items-baseline">
                     <div class="text-[#0a2540]">
                         <div class="text-lg font-semibold">GRAND TOTAL HOURS</div>
-                        <div class="text-xs text-slate-400">(Single + Multi Engine only)</div>
+                        <div class="text-xs text-slate-400">(Single-Engine + Multi-Engine only)</div>
                     </div>
                     <div id="grand-total-time" class="text-5xl font-bold text-emerald-600">0.0</div>
                 </div>
@@ -113,18 +126,7 @@
     </div>
 </div>
 
-<!-- Photo Viewer -->
-<div id="photo-modal" class="hidden fixed inset-0 bg-black/95 flex items-center justify-center z-[100]">
-    <div class="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
-        <div class="px-6 py-4 border-b flex justify-between">
-            <h3 class="font-semibold">Flight Photos</h3>
-            <button onclick="closePhotoModal()" class="text-4xl">×</button>
-        </div>
-        <div id="photo-container" class="p-8 overflow-auto max-h-[80vh] flex flex-col gap-8"></div>
-    </div>
-</div>
-
-<!-- Add/Edit Modal -->
+<!-- Modal -->
 <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto">
         <div class="px-8 py-6 border-b sticky top-0 bg-white z-10 flex justify-between">
@@ -134,25 +136,25 @@
         
         <form id="flight-form" onsubmit="handleFormSubmit(event)" class="p-8 grid grid-cols-12 gap-6">
             <div class="col-span-12 md:col-span-4">
-                <label class="block text-xs font-medium text-slate-500 mb-1">DATE (2023.aug.22)</label>
-                <input type="text" id="form-date" required class="w-full border border-slate-300 rounded-2xl px-5 py-4">
+                <label class="block text-xs font-medium text-slate-500 mb-1">DATE (e.g. 2023.aug.22)</label>
+                <input type="text" id="form-date" placeholder="2023.aug.22" required class="w-full border border-slate-300 rounded-2xl px-5 py-4 font-medium">
             </div>
             <div class="col-span-12 md:col-span-4">
                 <label class="block text-xs font-medium text-slate-500 mb-1">AIRCRAFT TYPE</label>
-                <input type="text" id="form-type" required class="w-full border border-slate-300 rounded-2xl px-5 py-4">
+                <input type="text" id="form-type" placeholder="Cessna 172" required class="w-full border border-slate-300 rounded-2xl px-5 py-4">
             </div>
             <div class="col-span-12 md:col-span-3">
                 <label class="block text-xs font-medium text-slate-500 mb-1">REG</label>
-                <input type="text" id="form-reg" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
+                <input type="text" id="form-reg" placeholder="C-GABC" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
             </div>
 
             <div class="col-span-6 md:col-span-2">
                 <label class="block text-xs font-medium text-slate-500 mb-1">FROM</label>
-                <input type="text" id="form-from" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
+                <input type="text" id="form-from" placeholder="CYVR" maxlength="4" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
             </div>
             <div class="col-span-6 md:col-span-2">
                 <label class="block text-xs font-medium text-slate-500 mb-1">TO</label>
-                <input type="text" id="form-to" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
+                <input type="text" id="form-to" placeholder="CYLW" maxlength="4" class="w-full border border-slate-300 rounded-2xl px-5 py-4 uppercase font-mono">
             </div>
 
             <div class="col-span-12 md:col-span-2">
@@ -162,7 +164,7 @@
 
             <div class="col-span-12 md:col-span-6">
                 <label class="block text-xs font-medium text-slate-500 mb-1">PIC NAME</label>
-                <input type="text" id="form-pic-name" class="w-full border border-slate-300 rounded-2xl px-5 py-4">
+                <input type="text" id="form-pic-name" placeholder="Alan Gilels" class="w-full border border-slate-300 rounded-2xl px-5 py-4">
             </div>
             <div class="col-span-12 md:col-span-6">
                 <label class="block text-xs font-medium text-slate-500 mb-1">CO-PILOT NAME</label>
@@ -232,14 +234,7 @@
 
             <div class="col-span-12">
                 <label class="block text-xs font-medium text-slate-500 mb-1">REMARKS</label>
-                <textarea id="form-remarks" rows="3" class="w-full border border-slate-300 rounded-3xl px-5 py-4"></textarea>
-            </div>
-
-            <div class="col-span-12">
-                <label class="block text-xs font-medium text-slate-500 mb-2">PHOTOS</label>
-                <button type="button" onclick="document.getElementById('photo-upload').click()" class="px-8 py-4 border-2 border-dashed border-slate-300 rounded-3xl hover:border-sky-400">📸 Add Photos</button>
-                <input type="file" id="photo-upload" multiple accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
-                <div id="selected-photos" class="mt-4 flex flex-wrap gap-3"></div>
+                <textarea id="form-remarks" rows="3" class="w-full border border-slate-300 rounded-3xl px-5 py-4" placeholder="Notes..."></textarea>
             </div>
 
             <div class="col-span-12 flex gap-3 pt-8">
@@ -259,82 +254,66 @@
         messagingSenderId: "74288469835",
         appId: "1:74288469835:web:c8c3dbe90e65a69a9bbace"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    const storage = firebase.storage();
 
     let flights = [];
     let editId = null;
-    let currentPhotos = [];
 
-    // Photo functions
-    async function handlePhotoUpload(e) {
-        const files = e.target.files;
-        for (let file of files) {
-            const url = await uploadPhoto(file);
-            if (url) currentPhotos.push(url);
-        }
-        renderSelectedPhotos();
+    function loadJsonFile() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = event => {
+                try {
+                    const loaded = JSON.parse(event.target.result);
+                    flights = Array.isArray(loaded) ? loaded : [];
+                    localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
+                    flights.forEach(f => {
+                        if (f && f.id) db.collection('flights').doc(f.id).set(f).catch(() => {});
+                    });
+                    updateAllTotals();
+                    showToast(`✅ Loaded ${flights.length} flights`);
+                } catch (err) {
+                    showToast("❌ Error reading JSON", "error");
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
     }
 
-    async function uploadPhoto(file) {
-        const ref = storage.ref('flight-photos/' + Date.now() + '-' + file.name);
-        try {
-            await ref.put(file);
-            return await ref.getDownloadURL();
-        } catch (err) {
-            console.error(err);
-            return null;
-        }
-    }
-
-    function renderSelectedPhotos() {
-        const container = document.getElementById('selected-photos');
-        container.innerHTML = currentPhotos.map((url, i) => `
-            <div class="relative inline-block">
-                <img src="${url}" class="h-24 w-24 object-cover rounded-xl border">
-                <button onclick="removeTempPhoto(${i})" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">×</button>
-            </div>
-        `).join('');
-    }
-
-    function removeTempPhoto(i) {
-        currentPhotos.splice(i, 1);
-        renderSelectedPhotos();
-    }
-
-    function showPhotos(id) {
-        const flight = flights.find(f => f.id === id);
-        if (!flight?.photos?.length) return;
-        const container = document.getElementById('photo-container');
-        container.innerHTML = flight.photos.map(url => `<img src="${url}" class="photo-thumb mx-auto">`).join('');
-        document.getElementById('photo-modal').classList.remove('hidden');
-    }
-
-    function closePhotoModal() {
-        document.getElementById('photo-modal').classList.add('hidden');
-    }
-
-    // Delete
-    function deleteFlight(id) {
-        if (!confirm("Delete this flight and all its photos permanently?")) return;
-        db.collection('flights').doc(id).delete().catch(() => {});
-        flights = flights.filter(f => f.id !== id);
-        updateAllTotals();
-        saveData();
-        showToast("Flight deleted");
-    }
-
-    function saveData() {
-        localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
+    function downloadLocalFile() {
         const dataStr = JSON.stringify(flights, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
         const link = document.createElement('a');
-        link.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+        link.href = dataUri;
         link.download = 'canadianPilotLogbook.json';
         link.click();
-        flights.forEach(f => {
-            if (f.id) db.collection('flights').doc(f.id).set(f, { merge: true }).catch(() => {});
-        });
+    }
+
+    async function forceFullSync() {
+        if (confirm("Force full sync?")) {
+            try {
+                const snapshot = await db.collection('flights').get();
+                const cloudFlights = [];
+                snapshot.forEach(doc => cloudFlights.push(doc.data()));
+                const existingIds = new Set(flights.map(f => f.id));
+                cloudFlights.forEach(cf => {
+                    if (cf && cf.id && !existingIds.has(cf.id)) flights.push(cf);
+                });
+                localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
+                updateAllTotals();
+                showToast("✅ Synced");
+            } catch (e) {
+                showToast("Cloud not reachable");
+            }
+        }
     }
 
     function parseCustomDate(dateStr) {
@@ -377,16 +356,27 @@
                     <th class="w-16 no-print">ACTIONS</th>
                 `;
                 tbody.appendChild(headerRow);
+
+                const subHeaderRow = document.createElement('tr');
+                subHeaderRow.className = 'bg-slate-700 text-[10px] text-white';
+                subHeaderRow.innerHTML = `
+                    <th></th><th></th><th></th><th></th><th></th>
+                    <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
+                    <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th><th>Co</th>
+                    <th>Day PIC</th><th>Day Dual</th><th>Night PIC</th><th>Night Dual</th>
+                    <th>IMC</th><th>Hood</th><th>FTD</th><th>IFR</th>
+                    <th></th><th></th>
+                `;
+                tbody.appendChild(subHeaderRow);
             }
 
-            const hasPhotos = f.photos && f.photos.length > 0;
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${f.date || ''}</td>
+                <td class="font-medium">${f.date || ''}</td>
                 <td class="text-left">${f.aircraftType || ''}</td>
-                <td>${f.registration || ''}</td>
-                <td>${f.from || ''}</td>
-                <td>${f.to || ''}</td>
+                <td class="font-mono">${f.registration || ''}</td>
+                <td class="font-mono">${f.from || ''}</td>
+                <td class="font-mono">${f.to || ''}</td>
                 <td>${parseFloat(f.seDayPic||0).toFixed(1)}</td>
                 <td>${parseFloat(f.seDayDual||0).toFixed(1)}</td>
                 <td>${parseFloat(f.seNightPic||0).toFixed(1)}</td>
@@ -406,12 +396,7 @@
                 <td>${parseFloat(f.ftd||0).toFixed(1)}</td>
                 <td>${parseFloat(f.ifrAppr||0).toFixed(1)}</td>
                 <td>${parseInt(f.nightLandings||0)}</td>
-                <td class="text-left text-xs">
-                    ${f.picName ? '<strong>PIC:</strong> '+f.picName : ''}
-                    ${f.copilotName ? '<br><strong>Co:</strong> '+f.copilotName : ''}
-                    <br>${f.remarks || ''}
-                    ${hasPhotos ? `<br><span onclick="showPhotos('${f.id}')" class="text-sky-600 underline cursor-pointer">📸 Photos (${f.photos.length})</span>` : ''}
-                </td>
+                <td class="text-left text-xs">${f.picName ? '<strong>PIC:</strong> ' + f.picName : ''}${f.copilotName ? '<br><strong>Co:</strong> ' + f.copilotName : ''}<br>${f.remarks || ''}</td>
                 <td class="no-print">
                     <button onclick="editFlight('${f.id}')" class="text-sky-600 hover:text-sky-800 px-2 py-1 text-lg">✏️</button>
                     <button onclick="deleteFlight('${f.id}')" class="text-red-600 hover:text-red-800 px-2 py-1 text-lg ml-2">🗑</button>
@@ -421,23 +406,33 @@
         });
 
         document.getElementById('entry-count').textContent = flights.length + " entries";
-        setTimeout(() => document.getElementById('table-wrapper').scrollTop = document.getElementById('table-wrapper').scrollHeight, 100);
+
+        setTimeout(() => {
+            const wrapper = document.getElementById('table-wrapper');
+            if (wrapper) wrapper.scrollTop = wrapper.scrollHeight;
+        }, 100);
     }
 
     function buildTotalsFooter() {
-        let grand = 0;
-        let seDayPic = 0, seDayDual = 0, meDayPic = 0, meDayDual = 0, xcDayDual = 0, actualIMC = 0, hood = 0, ftd = 0;
+        let seDayPic = 0, seDayDual = 0, seNightPic = 0, seNightDual = 0, seCo = 0;
+        let meDayPic = 0, meDayDual = 0, meNightPic = 0, meNightDual = 0, meCo = 0;
+        let xcDayPic = 0, xcDayDual = 0, xcNightPic = 0, xcNightDual = 0;
+        let actualIMC = 0, hood = 0, ftd = 0, ifrAppr = 0;
+        let nightLandings = 0;
+        let grandTotal = 0;
 
         flights.forEach(f => {
-            seDayPic += parseFloat(f.seDayPic||0);
-            seDayDual += parseFloat(f.seDayDual||0);
-            meDayPic += parseFloat(f.meDayPic||0);
-            meDayDual += parseFloat(f.meDayDual||0);
-            xcDayDual += parseFloat(f.xcDayDual||0);
-            actualIMC += parseFloat(f.actualIMC||0);
-            hood += parseFloat(f.hood||0);
-            ftd += parseFloat(f.ftd||0);
-            grand += parseFloat(f.seDayPic||0) + parseFloat(f.seDayDual||0) + parseFloat(f.meDayPic||0) + parseFloat(f.meDayDual||0);
+            seDayPic += parseFloat(f.seDayPic || 0); seDayDual += parseFloat(f.seDayDual || 0);
+            seNightPic += parseFloat(f.seNightPic || 0); seNightDual += parseFloat(f.seNightDual || 0); seCo += parseFloat(f.seCo || 0);
+            meDayPic += parseFloat(f.meDayPic || 0); meDayDual += parseFloat(f.meDayDual || 0);
+            meNightPic += parseFloat(f.meNightPic || 0); meNightDual += parseFloat(f.meNightDual || 0); meCo += parseFloat(f.meCo || 0);
+            xcDayPic += parseFloat(f.xcDayPic || 0); xcDayDual += parseFloat(f.xcDayDual || 0);
+            xcNightPic += parseFloat(f.xcNightPic || 0); xcNightDual += parseFloat(f.xcNightDual || 0);
+            actualIMC += parseFloat(f.actualIMC || 0); hood += parseFloat(f.hood || 0);
+            ftd += parseFloat(f.ftd || 0); ifrAppr += parseFloat(f.ifrAppr || 0);
+            nightLandings += parseInt(f.nightLandings || 0);
+            grandTotal += parseFloat(f.seDayPic || 0) + parseFloat(f.seDayDual || 0) + parseFloat(f.seNightPic || 0) + parseFloat(f.seNightDual || 0) + parseFloat(f.seCo || 0) +
+                          parseFloat(f.meDayPic || 0) + parseFloat(f.meDayDual || 0) + parseFloat(f.meNightPic || 0) + parseFloat(f.meNightDual || 0) + parseFloat(f.meCo || 0);
         });
 
         document.getElementById('totals-grid').innerHTML = `
@@ -445,21 +440,23 @@
             <div><strong>SE Day Dual:</strong> ${seDayDual.toFixed(1)}</div>
             <div><strong>ME Day PIC:</strong> ${meDayPic.toFixed(1)}</div>
             <div><strong>ME Day Dual:</strong> ${meDayDual.toFixed(1)}</div>
+            <div><strong>XC Day PIC:</strong> ${xcDayPic.toFixed(1)}</div>
             <div><strong>XC Day Dual:</strong> ${xcDayDual.toFixed(1)}</div>
             <div><strong>Actual IMC:</strong> ${actualIMC.toFixed(1)}</div>
             <div><strong>Hood:</strong> ${hood.toFixed(1)}</div>
             <div><strong>FTD:</strong> ${ftd.toFixed(1)}</div>
         `;
-        document.getElementById('grand-total-time').textContent = grand.toFixed(1);
+
+        document.getElementById('grand-total-time').textContent = grandTotal.toFixed(1);
 
         document.getElementById('logbook-tfoot').innerHTML = `
             <tr class="bg-slate-100 font-semibold border-t-4 border-[#0a2540]">
                 <td colspan="5" class="text-left pl-8">TOTALS →</td>
-                <td>${seDayPic.toFixed(1)}</td><td>${seDayDual.toFixed(1)}</td><td>0.0</td><td>0.0</td><td>0.0</td>
-                <td>${meDayPic.toFixed(1)}</td><td>${meDayDual.toFixed(1)}</td><td>0.0</td><td>0.0</td><td>0.0</td>
-                <td>0.0</td><td>${xcDayDual.toFixed(1)}</td><td>0.0</td><td>0.0</td>
-                <td>${actualIMC.toFixed(1)}</td><td>${hood.toFixed(1)}</td><td>${ftd.toFixed(1)}</td><td>0.0</td>
-                <td>0</td><td></td><td class="no-print"></td>
+                <td>${seDayPic.toFixed(1)}</td><td>${seDayDual.toFixed(1)}</td><td>${seNightPic.toFixed(1)}</td><td>${seNightDual.toFixed(1)}</td><td>${seCo.toFixed(1)}</td>
+                <td>${meDayPic.toFixed(1)}</td><td>${meDayDual.toFixed(1)}</td><td>${meNightPic.toFixed(1)}</td><td>${meNightDual.toFixed(1)}</td><td>${meCo.toFixed(1)}</td>
+                <td>${xcDayPic.toFixed(1)}</td><td>${xcDayDual.toFixed(1)}</td><td>${xcNightPic.toFixed(1)}</td><td>${xcNightDual.toFixed(1)}</td>
+                <td>${actualIMC.toFixed(1)}</td><td>${hood.toFixed(1)}</td><td>${ftd.toFixed(1)}</td><td>${ifrAppr.toFixed(1)}</td>
+                <td>${nightLandings}</td><td></td><td class="no-print"></td>
             </tr>`;
     }
 
@@ -470,10 +467,8 @@
 
     function showAddModal() {
         editId = null;
-        currentPhotos = [];
         document.getElementById('modal-title').textContent = 'Add New Flight';
         document.getElementById('flight-form').reset();
-        document.getElementById('selected-photos').innerHTML = '';
         document.getElementById('modal').classList.remove('hidden');
     }
 
@@ -485,7 +480,6 @@
         const flight = flights.find(f => f.id === id);
         if (!flight) return;
         editId = id;
-        currentPhotos = flight.photos ? [...flight.photos] : [];
         document.getElementById('modal-title').textContent = 'Edit Flight';
 
         document.getElementById('form-date').value = flight.date || '';
@@ -517,12 +511,34 @@
         document.getElementById('form-nightland').value = flight.nightLandings || 0;
         document.getElementById('form-remarks').value = flight.remarks || '';
 
-        renderSelectedPhotos();
         document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function deleteFlight(id) {
+        if (!confirm("Delete this flight permanently from both local and Firebase?")) return;
+
+        // Delete from Firebase
+        db.collection('flights').doc(id).delete().then(() => {
+            console.log("Successfully deleted from Firebase");
+        }).catch(err => {
+            console.warn("Firebase delete failed (may be offline or already deleted)", err);
+        });
+
+        // Remove from local array
+        flights = flights.filter(f => f.id !== id);
+
+        updateAllTotals();
+        saveData();
+        showToast("Flight deleted from local & cloud");
     }
 
     function handleFormSubmit(e) {
         e.preventDefault();
+        const saveBtn = document.getElementById('save-btn');
+        const originalText = saveBtn.textContent;
+        saveBtn.textContent = "SAVING...";
+        saveBtn.disabled = true;
+
         const flightData = {
             date: document.getElementById('form-date').value.trim(),
             aircraftType: document.getElementById('form-type').value.trim(),
@@ -552,7 +568,6 @@
             ifrAppr: parseFloat(document.getElementById('form-ifr-appr').value) || 0,
             nightLandings: parseInt(document.getElementById('form-nightland').value) || 0,
             remarks: document.getElementById('form-remarks').value.trim(),
-            photos: currentPhotos,
             id: editId || Date.now().toString()
         };
 
@@ -566,41 +581,71 @@
         updateAllTotals();
         saveData();
         hideModal();
-        currentPhotos = [];
         showToast(editId ? "Flight updated" : "New flight saved");
+        saveBtn.textContent = originalText;
+        saveBtn.disabled = false;
     }
 
     function exportToPDF() {
         const element = document.getElementById('logbook-content');
         const wrapper = document.getElementById('table-wrapper');
-        const original = wrapper.style.maxHeight;
+        const originalMaxHeight = wrapper.style.maxHeight || 'none';
         wrapper.style.maxHeight = 'none';
+        element.style.height = 'auto';
 
         const opt = {
-            margin: [0.3, 0.2, 0.3, 0.2],
+            margin: [0.35, 0.25, 0.45, 0.25],
             filename: `Canadian_Pilot_Logbook_${new Date().toISOString().slice(0,10)}.pdf`,
             image: { type: 'jpeg', quality: 0.92 },
-            html2canvas: { scale: 1.5, useCORS: true, scrollY: 0, height: element.scrollHeight + 800 },
-            jsPDF: { unit: 'in', format: 'a3', orientation: 'landscape' }
+            html2canvas: { scale: 1.5, useCORS: true, letterRendering: true, scrollY: 0, height: element.scrollHeight + 700 },
+            jsPDF: { unit: 'in', format: 'a3', orientation: 'landscape' },
+            pagebreak: { mode: ['css', 'legacy'] }
         };
 
         html2pdf().set(opt).from(element).save().then(() => {
-            wrapper.style.maxHeight = original;
+            wrapper.style.maxHeight = originalMaxHeight;
+            element.style.height = '';
         });
     }
 
-    function showToast(msg) {
-        const t = document.createElement('div');
-        t.className = 'fixed bottom-6 right-6 bg-emerald-600 text-white px-6 py-3 rounded-2xl shadow-2xl';
-        t.textContent = msg;
-        document.body.appendChild(t);
-        setTimeout(() => t.remove(), 2500);
+    function showToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-6 right-6 px-6 py-3 rounded-2xl text-white shadow-2xl z-50 bg-emerald-600';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2500);
+    }
+
+    function saveData() {
+        localStorage.setItem('canadianPilotLogbook', JSON.stringify(flights));
+        
+        // Auto-download JSON
+        const dataStr = JSON.stringify(flights, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+        const link = document.createElement('a');
+        link.href = dataUri;
+        link.download = 'canadianPilotLogbook.json';
+        link.click();
+
+        // Sync to Firebase
+        flights.forEach(f => {
+            if (f && f.id) {
+                db.collection('flights').doc(f.id).set(f, { merge: true }).catch(() => {});
+            }
+        });
     }
 
     window.onload = () => {
-        const local = localStorage.getItem('canadianPilotLogbook');
-        if (local) flights = JSON.parse(local);
+        const localData = localStorage.getItem('canadianPilotLogbook');
+        if (localData) {
+            flights = JSON.parse(localData);
+        }
         updateAllTotals();
+
+        setTimeout(() => {
+            const wrapper = document.getElementById('table-wrapper');
+            if (wrapper) wrapper.scrollTop = wrapper.scrollHeight;
+        }, 300);
     };
 </script>
 </body>
