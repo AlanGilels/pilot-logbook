@@ -162,7 +162,7 @@
                 <input type="text" id="form-copilot-name" class="w-full border border-slate-300 rounded-2xl px-5 py-4">
             </div>
 
-            <!-- Improved Photo Selection -->
+            <!-- Photo Selection -->
             <div class="col-span-12">
                 <label class="block text-xs font-medium text-slate-500 mb-1">PHOTO</label>
                 <div class="flex gap-3">
@@ -171,7 +171,7 @@
                         Choose Photo
                     </button>
                 </div>
-                <p class="text-xs text-slate-400 mt-1">Click button → select photo → then copy the file into the "photos" folder</p>
+                <p class="text-xs text-slate-400 mt-1">Click button → select photo → copy file into the "photos" folder</p>
             </div>
 
             <!-- Single-Engine -->
@@ -186,9 +186,7 @@
                 </div>
             </div>
 
-            <!-- Multi-Engine, X-Country, Instrument Time, Night Landings, Remarks are the same as your original -->
-            <!-- (Included fully below for completeness) -->
-
+            <!-- Multi-Engine -->
             <div class="col-span-12">
                 <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">MULTI-ENGINE</div>
                 <div class="grid grid-cols-5 gap-4">
@@ -200,6 +198,7 @@
                 </div>
             </div>
 
+            <!-- X-Country -->
             <div class="col-span-12">
                 <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">X-COUNTRY</div>
                 <div class="grid grid-cols-2 gap-8">
@@ -220,6 +219,7 @@
                 </div>
             </div>
 
+            <!-- Instrument Time -->
             <div class="col-span-12">
                 <div class="text-xs uppercase tracking-widest font-medium text-slate-400 mb-2">INSTRUMENT TIME</div>
                 <div class="grid grid-cols-4 gap-4">
@@ -295,7 +295,6 @@
         input.onchange = (e) => {
             const files = e.target.files;
             if (files.length === 0) return;
-
             let paths = Array.from(files).map(file => "photos/" + file.name);
             document.getElementById('form-photo-link').value = paths.join(", ");
         };
@@ -314,7 +313,6 @@
 
         sorted.forEach((f, index) => {
             if (index > 0 && index % 10 === 0) {
-                // Repeating header
                 const headerRow = document.createElement('tr');
                 headerRow.className = 'repeat-header';
                 headerRow.innerHTML = `<th class="w-28">DATE</th><th class="w-40">AIRCRAFT TYPE</th><th class="w-24">REG</th><th class="w-20">FROM</th><th class="w-20">TO</th><th colspan="5" class="text-center">SINGLE-ENGINE</th><th colspan="5" class="text-center">MULTI-ENGINE</th><th colspan="4" class="text-center">X-COUNTRY</th><th colspan="4" class="text-center">INSTRUMENT TIME</th><th class="w-12">NIGHT LNDG</th><th class="text-left w-56">PIC / CO-PILOT / REMARKS</th><th class="w-16 no-print">ACTIONS</th>`;
@@ -386,10 +384,15 @@
 
         document.getElementById('entry-count').textContent = flights.length + " entries";
         buildTotalsFooter();
+
+        // Auto-scroll to bottom when table loads or refreshes
+        setTimeout(() => {
+            const wrapper = document.getElementById('table-wrapper');
+            if (wrapper) wrapper.scrollTop = wrapper.scrollHeight;
+        }, 100);
     }
 
     function buildTotalsFooter() {
-        // Your original totals logic (kept full)
         let seDayPic = 0, seDayDual = 0, seNightPic = 0, seNightDual = 0, seCo = 0;
         let meDayPic = 0, meDayDual = 0, meNightPic = 0, meNightDual = 0, meCo = 0;
         let xcDayPic = 0, xcDayDual = 0, xcNightPic = 0, xcNightDual = 0;
@@ -467,9 +470,26 @@
         document.getElementById('form-pic-name').value = flight.picName || '';
         document.getElementById('form-copilot-name').value = flight.copilotName || '';
         document.getElementById('form-photo-link').value = flight.photoLink || '';
-        // Fill other fields...
         document.getElementById('form-se-day-pic').value = flight.seDayPic || 0;
-        // (All other fields filled similarly - omitted for brevity but they are included in full logic)
+        document.getElementById('form-se-day-dual').value = flight.seDayDual || 0;
+        document.getElementById('form-se-night-pic').value = flight.seNightPic || 0;
+        document.getElementById('form-se-night-dual').value = flight.seNightDual || 0;
+        document.getElementById('form-se-co').value = flight.seCo || 0;
+        document.getElementById('form-me-day-pic').value = flight.meDayPic || 0;
+        document.getElementById('form-me-day-dual').value = flight.meDayDual || 0;
+        document.getElementById('form-me-night-pic').value = flight.meNightPic || 0;
+        document.getElementById('form-me-night-dual').value = flight.meNightDual || 0;
+        document.getElementById('form-me-co').value = flight.meCo || 0;
+        document.getElementById('form-xc-day-pic').value = flight.xcDayPic || 0;
+        document.getElementById('form-xc-day-dual').value = flight.xcDayDual || 0;
+        document.getElementById('form-xc-night-pic').value = flight.xcNightPic || 0;
+        document.getElementById('form-xc-night-dual').value = flight.xcNightDual || 0;
+        document.getElementById('form-actual-imc').value = flight.actualIMC || 0;
+        document.getElementById('form-hood').value = flight.hood || 0;
+        document.getElementById('form-ftd').value = flight.ftd || 0;
+        document.getElementById('form-ifr-appr').value = flight.ifrAppr || 0;
+        document.getElementById('form-nightland').value = flight.nightLandings || 0;
+        document.getElementById('form-remarks').value = flight.remarks || '';
 
         document.getElementById('modal').classList.remove('hidden');
     }
@@ -538,7 +558,7 @@
         saveBtn.disabled = false;
     }
 
-    function exportToPDF() { /* your original export code */ 
+    function exportToPDF() {
         const element = document.getElementById('logbook-content');
         const wrapper = document.getElementById('table-wrapper');
         const originalMaxHeight = wrapper.style.maxHeight || 'none';
@@ -638,6 +658,12 @@
         const localData = localStorage.getItem('canadianPilotLogbook');
         if (localData) flights = JSON.parse(localData);
         updateAllTotals();
+
+        // Auto-scroll to bottom when page loads or refreshes
+        setTimeout(() => {
+            const wrapper = document.getElementById('table-wrapper');
+            if (wrapper) wrapper.scrollTop = wrapper.scrollHeight;
+        }, 300);
     };
 </script>
 </body>
